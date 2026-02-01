@@ -3,21 +3,27 @@ import os
 import requests
 import subprocess
 import random
+import json
 from ftplib import FTP
 
 # =========================================================
 # 設定（あなたが指定した実データ）
 # =========================================================
-PEXELS_API_KEY = "GdQBEe1V2DwCLrpzOT63eB2MXskdMdKzhF1yjZQS4W2e2PpU6StSGXD1"
+# =========================================================
+# 設定読み込み（config.json）
+# =========================================================
+with open("config.json", "r", encoding="utf-8") as f:
+    _cfg = json.load(f)
 
-FTP_HOST = "ftp-exbridge.heteml.net"
-FTP_USER = "exbridge"
-FTP_PASS = "Xbrg20042025"
+PEXELS_API_KEY = _cfg["PEXELS_API_KEY"]
 
-FTP_DIR = "/web/exbridge_jp/aidexx/"
+FTP_HOST = _cfg["FTP_HOST"]
+FTP_USER = _cfg["FTP_USER"]
+FTP_PASS = _cfg["FTP_PASS"]
+FTP_DIR  = _cfg["FTP_DIR"]
 
-TARGET_SECONDS = 120
-OUTPUT_FILE = "final_mv.mp4"
+TARGET_SECONDS = _cfg["TARGET_SECONDS"]
+OUTPUT_FILE    = _cfg["OUTPUT_FILE"]
 
 HEADERS = {"Authorization": PEXELS_API_KEY}
 
