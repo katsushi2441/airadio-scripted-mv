@@ -1,0 +1,12 @@
+{
+  "PEXELS_API_KEY": "",
+
+  "FTP_HOST": "",
+  "FTP_USER": "",
+  "FTP_PASS": "",
+  "FTP_DIR": "",
+
+  "TARGET_SECONDS": 120,
+  "OUTPUT_FILE": "final_mv.mp4"
+}
+
