@@ -2,8 +2,8 @@
 
 
 // =========================================
-// audio2mp4.php
-// 画像 + mp3/wav URL + ラジオ台本 → mp4 生成（スクロール対応）
+// scripted-mv.php
+// 画像 + mp3/wav URL + スクロール字幕 → mp4 生成（スクロール対応）
 // + 音声ファイル事前アップロード（専用ボタン）
 // PHP5互換 / 機能削除なし
 // =========================================
@@ -287,18 +287,12 @@ video {
 
 <div class="wrap">
 <div class="top-nav">
-    <a href="airadio.php">News2Audio</a>
-    <a href="voicebox_ui.php">Voicebox UI</a>
-    <a href="bgm_manager.php">BGM Manager</a>
-    <a href="ttsfile.php">TTS Files</a>
-    <a href="audio2mp4.php">Audio2MP4</a>
-    <a href="video2mp4.php">Video2MP4</a>
 </div>
 
 <div class="card">
 <h1>🎵 音声/楽曲ファイルアップロード</h1>
 
-<form method="post" enctype="multipart/form-data" action="video2mp4.php">
+<form method="post" enctype="multipart/form-data" action="scripted-mv.php">
 
 <input type="hidden" name="upload_audio" value="1">
 
@@ -310,7 +304,7 @@ video {
 </div>
 
 <div class="card">
-<h1>🎬 背景動画＋ラジオ音声＋台本 → MP4</h1>
+<h1>🎬 背景動画＋スクロール台本 → MP4</h1>
 
 <?php if ($msg !== ""): ?>
 <div><?php echo $msg; ?></div>
@@ -324,7 +318,7 @@ video {
 <label style="margin-top:12px;">② 音声/楽曲URL</label>
 <input type="text" name="audio_url" value="<?php echo htmlspecialchars($audio_url, ENT_QUOTES, "UTF-8"); ?>" required>
 
-<label style="margin-top:12px;">③ ラジオ台本（スクロール表示）</label>
+<label style="margin-top:12px;">③ 字幕（スクロール表示）</label>
 <textarea name="script_text"></textarea>
 
 <button type="submit">MP4を生成</button>

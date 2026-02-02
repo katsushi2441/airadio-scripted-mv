@@ -40,6 +40,19 @@ Each plugin:
 - Can evolve independently
 - Gains more value when combined with others
 
+Future updates will focus on expanding subtitle customization,
+including font size, positioning, and visual layout templates.
+
+---
+
+## Demo
+
+This project is currently demonstrated at:
+https://airadio-scripted-mv.exbridge.jp/
+
+A demo video showing the full pipeline is also available on YouTube.
+
+
 ---
 
 ## License
