@@ -52,6 +52,13 @@ https://airadio-scripted-mv.exbridge.jp/
 
 A demo video showing the full pipeline is also available on YouTube.
 
+---
+
+## Whitepaper
+
+- [AIRadio Scripted MV Whitepaper](docs/whitepaper.md)
+
+
 
 ---
 
