@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=0.8, maximum-scale=1.5, user-scalable=yes">
+<title>Kamishib.AI Maker – 紙芝居エディタ</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* スマホ用の追加スタイル */
+@media (max-width: 768px) {
+    #scriptArea {
+        font-size: 12px !important;
+        -webkit-text-size-adjust: none !important;
+    }
+    textarea {
+        font-size: 12px !important;
+        -webkit-text-size-adjust: none !important;
+    }
+}
+</style>
+</head>
+<body>
+<div class="header">
+    <a href="./listkamishibai.php">
+        <img src="./images/kamishibai_logo.png" class="logo">
+    </a>
+    <h2>Kamishib.AI Maker – 紙芝居エディタ</h2>
+</div>
+<div id="thinking-overlay">
+    <div id="thinking-box">
+        <div id="thinking-title">Thinking </div>
+        <div id="thinking-sub">AI が考えています。しばらくお待ちください。</div>
+    </div>
+</div>
+<textarea id="scriptArea" placeholder="ここに元ネタ原稿を書く..."></textarea>
+<button onclick="generateStory()">シナリオ生成</button>
+<div id="editor">
+    <div class="slideBox">
+        <input type="file" accept="image/*" onchange="previewThumb(this,0)">
+        <img id="thumb0">
+        <textarea id="text0" placeholder="セリフ1"></textarea>
+    </div>
+    <div class="slideBox">
+        <input type="file" accept="image/*" onchange="previewThumb(this,1)">
+        <img id="thumb1">
+        <textarea id="text1" placeholder="セリフ2"></textarea>
+    </div>
+    <div class="slideBox">
+        <input type="file" accept="image/*" onchange="previewThumb(this,2)">
+        <img id="thumb2">
+        <textarea id="text2" placeholder="セリフ3"></textarea>
+    </div>
+    <div class="slideBox">
+        <input type="file" accept="image/*" onchange="previewThumb(this,3)">
+        <img id="thumb3">
+        <textarea id="text3" placeholder="セリフ4"></textarea>
+    </div>
+    <div class="slideBox">
+        <input type="file" accept="image/*" onchange="previewThumb(this,4)">
+        <img id="thumb4">
+        <textarea id="text4" placeholder="セリフ5"></textarea>
+    </div>
+</div>
+
+<div style="width:92%;margin:20px auto;">
+    <label style="display:block;margin-bottom:6px;">
+        📝 プロジェクトタイトル
+    </label>
+    <input type="text" id="projectTitle" placeholder="タイトルを入力..." style="width:60%;padding:8px;">
+</div>
+
+<div style="width:92%;margin:20px auto;">
+    <label style="display:block;margin-bottom:6px;">
+        🎵 BGM（mp3）
+    </label>
+    <input type="file" id="bgmFile" accept="audio/*">
+    <div id="bgmStatus" style="margin-top:8px;color:#38bdf8;"></div>
+    <label style="display:block;margin-top:12px;margin-bottom:6px;">
+        ⏱ BGM開始秒
+    </label>
+    <input type="number" id="bgmStart" value="0" min="0" style="width:120px;">
+</div>
+<div style="display:flex;gap:16px;margin:10px 0 0 14%;">
+    <button id="playBtn">再生</button>
+    <button onclick="saveProject()">💾 保存</button>
+</div>
+<div id="preview">
+    <video id="previewVideo" controls style="display:none;width:100%;max-width:640px;"></video>
+    <img id="previewImage">
+    <div id="caption"></div>
+</div>
+
+<div style="margin-left:4%;margin-top:10px;">
+    <a href="listkamishibai.php">
+        <button>📂 プロジェクト一覧</button>
+    </a>
+</div>
+
+
+<script>
+(function(){
+    var s = document.createElement('script');
+    s.src = 'https://aiknowledgecms.exbridge.jp/simpletrack.php'
+          + '?url=' + encodeURIComponent(location.href)
+          + '&ref=' + encodeURIComponent(document.referrer);
+    document.head.appendChild(s);
+})();
+</script>
+<script src="script.js?v=3"></script>
+</body>
+</html>

@@ -1,5 +1,13 @@
 <?php
+$script_text = "";
+if(isset($_POST["script_text"])){
+    $script_text = $_POST["script_text"];
+}
 
+$audio_url = "";
+if(isset($_POST["audio_url"])){
+    $audio_url = $_POST["audio_url"];
+}
 
 // =========================================
 // scripted-mv.php
@@ -14,7 +22,7 @@ define("API_ENDPOINT", "http://exbridge.ddns.net:8002/audio_to_video_mp4");
 
 
 $musicDir = __DIR__ . "/musics";
-$musicUrlBase = "https://airadio.exbridge.jp/musics";
+$musicUrlBase = "https://airadio-scripted-mv.exbridge.jp/musics";
 
 if (!is_dir($musicDir)) {
     mkdir($musicDir, 0755, true);
@@ -170,7 +178,17 @@ if (
    audio2mp4.php
    構造・機能変更なし
 =============================== */
-
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2,6,23,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    font-size: 18px;
+    font-weight: 600;
+}
 body {
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     background:
@@ -282,6 +300,26 @@ video {
     border: 1px solid rgba(148, 163, 184, 0.35);
 }
 </style>
+<script>
+(function(){
+    var s = document.createElement('script');
+    s.src = 'https://aiknowledgecms.exbridge.jp/simpletrack.php'
+          + '?url=' + encodeURIComponent(location.href)
+          + '&ref=' + encodeURIComponent(document.referrer);
+    document.head.appendChild(s);
+})();
+
+var form = document.querySelector('form:not([action])');
+
+if(form){
+    form.addEventListener("submit", function(){
+        var overlay = document.getElementById("loading-overlay");
+        if(overlay){
+            overlay.style.display = "flex";
+        }
+    });
+}
+</script>
 </head>
 <body>
 
@@ -310,16 +348,16 @@ video {
 <div><?php echo $msg; ?></div>
 <?php endif; ?>
 
-<form method="post" enctype="multipart/form-data">
+<form id="generateForm" method="post" enctype="multipart/form-data">
 
 <label>① 背景動画</label>
 <input type="file" name="image" accept="video/mp4" required>
 
 <label style="margin-top:12px;">② 音声/楽曲URL</label>
-<input type="text" name="audio_url" value="<?php echo htmlspecialchars($audio_url, ENT_QUOTES, "UTF-8"); ?>" required>
+<input type="text" id="audio_url" name="audio_url" value="<?php echo htmlspecialchars($audio_url, ENT_QUOTES, "UTF-8"); ?>" required>
 
 <label style="margin-top:12px;">③ 字幕（スクロール表示）</label>
-<textarea name="script_text"></textarea>
+<textarea id="script_text" name="script_text"><?php echo htmlspecialchars($script_text, ENT_QUOTES, "UTF-8"); ?></textarea>
 
 <button type="submit">MP4を生成</button>
 </form>
@@ -341,6 +379,54 @@ video {
 
 </div>
 
+<div id="loading-overlay">
+    🎬 MP4生成中です…<br>しばらくお待ちください
+</div>
+
+<script>
+(function(){
+
+    var audioInput = document.getElementById("audio_url");
+    var scriptArea = document.getElementById("script_text");
+
+    if(!audioInput || !scriptArea) return;
+
+    // 復元
+    var savedAudio = localStorage.getItem("smv_audio_url");
+    var savedText  = localStorage.getItem("smv_script_text");
+
+    if(savedAudio && audioInput.value === ""){
+        audioInput.value = savedAudio;
+    }
+
+    if(savedText && scriptArea.value === ""){
+        scriptArea.value = savedText;
+    }
+
+    // 保存
+    audioInput.addEventListener("input", function(){
+        localStorage.setItem("smv_audio_url", this.value);
+    });
+
+    scriptArea.addEventListener("input", function(){
+        localStorage.setItem("smv_script_text", this.value);
+    });
+
+})();
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    var form = document.getElementById("generateForm");
+    var overlay = document.getElementById("loading-overlay");
+
+    if(form && overlay){
+        form.addEventListener("submit", function(){
+            overlay.style.display = "flex";
+        });
+    }
+
+});
+</script>
 </body>
 </html>
 
