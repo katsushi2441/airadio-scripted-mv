@@ -99,7 +99,7 @@ if ($detail) {
   <?php foreach ($videos as $v): ?>
     <article class="card">
       <a class="thumb" href="<?= h($THIS_FILE . '?id=' . urlencode($v['job_id'] ?? '')) ?>">
-        <video src="<?= h($v['video_url'] ?? '') ?>" muted preload="metadata" playsinline></video>
+        <video class="thumb-video" src="<?= h($v['video_url'] ?? '') ?>" muted preload="metadata" playsinline></video>
       </a>
       <div class="body">
         <div class="title"><?= h($v['title'] ?? '') ?></div>
@@ -135,6 +135,21 @@ if ($detail) {
 </div>
 <?php endif; ?>
 <script>
+function primeThumbVideos(root){
+  (root||document).querySelectorAll('video.thumb-video').forEach(function(v){
+    if(v.dataset.thumbReady)return;
+    v.dataset.thumbReady='1';
+    v.muted=true;
+    v.addEventListener('loadedmetadata',function(){
+      try{
+        var t=Math.min(1, Math.max(0, (v.duration||2)-0.1));
+        if(isFinite(t)) v.currentTime=t;
+      }catch(e){}
+    },{once:true});
+    v.addEventListener('seeked',function(){ v.pause(); },{once:true});
+  });
+}
+primeThumbVideos(document);
 var reelMuted=true,reelCurrent=0,reelSlides=[],reelObs=null,reelReady=false;
 function openReel(idx){
   var overlay=document.getElementById('reel-overlay');
