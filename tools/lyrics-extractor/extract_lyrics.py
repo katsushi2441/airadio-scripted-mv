@@ -110,7 +110,7 @@ def main():
     segments_iter, info = model.transcribe(
         str(final_vocals),
         language=args.language,
-        vad_filter=True,
+        vad_filter=False,
         beam_size=5,
     )
     segments = list(segments_iter)
