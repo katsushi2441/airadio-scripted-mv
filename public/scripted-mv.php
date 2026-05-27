@@ -213,7 +213,7 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
     </div>
   </div>
   <div class="userbar">
-    <span id="api-status" class="api api-ng">API ...</span>
+    <span id="api-status" class="api api-ng">API 未確認</span>
     <?php if ($logged_in): ?><span>@<strong><?= h($session_user) ?></strong></span><a class="btn-sm" href="?logout=1">logout</a><?php else: ?><a class="btn-sm" href="?login=1">Xでログイン</a><?php endif; ?>
   </div>
 </header>
@@ -261,8 +261,8 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
   </section>
 
   <section class="card">
-    <div class="card-head"><span class="dot"></span> Recent Jobs</div>
-    <div class="card-body"><div class="jobs" id="jobs-list"><div class="hint">読み込み中...</div></div></div>
+    <div class="card-head"><span class="dot"></span> Recent Jobs <button class="btn btn-mini" type="button" onclick="refreshJobs()">更新</button></div>
+    <div class="card-body"><div class="jobs" id="jobs-list"><div class="hint">必要なときに更新してください。</div></div></div>
   </section>
 <?php endif; ?>
 </main>
@@ -277,6 +277,7 @@ var form=document.getElementById('upload-form');
 if(form){
   form.addEventListener('submit',function(e){
     e.preventDefault();
+    refreshApiStatus();
     var btn=document.getElementById('btn-submit'); btn.disabled=true;
     fetch(PROXY+'?proxy=extract',{method:'POST',body:new FormData(form)})
       .then(r=>r.json()).then(function(d){
@@ -286,10 +287,6 @@ if(form){
       }).catch(function(err){btn.disabled=false;alert(err.message)});
   });
 }
-document.addEventListener('DOMContentLoaded',function(){
-  refreshApiStatus();
-  refreshJobs();
-});
 function refreshApiStatus(){
   var el=document.getElementById('api-status');
   if(!el) return;
