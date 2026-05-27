@@ -132,15 +132,36 @@ if (isset($_GET['file'], $_GET['job_id'])) {
     $url = $API . '/file/' . rawurlencode($jid) . '/' . rawurlencode($file);
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HEADER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+    $headers = array();
+    if (isset($_SERVER['HTTP_RANGE']) && preg_match('/^bytes=/', $_SERVER['HTTP_RANGE'])) {
+        $headers[] = 'Range: ' . $_SERVER['HTTP_RANGE'];
+    }
+    if ($headers) {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    }
     $data = curl_exec($ch);
     $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $ctype = curl_getinfo($ch, CURLINFO_CONTENT_TYPE) ?: 'application/octet-stream';
+    $header_size = (int)curl_getinfo($ch, CURLINFO_HEADER_SIZE);
     curl_close($ch);
-    if ($code !== 200 || $data === false) { http_response_code(404); echo 'file not found'; exit; }
+    if (!in_array($code, array(200, 206), true) || $data === false) { http_response_code(404); echo 'file not found'; exit; }
+    $raw_headers = substr($data, 0, $header_size);
+    $body = substr($data, $header_size);
+    if ($code === 206) {
+        http_response_code(206);
+    }
     header('Content-Type: ' . $ctype);
-    header('Content-Disposition: attachment; filename="' . $file . '"');
-    echo $data;
+    header('Accept-Ranges: bytes');
+    foreach (explode("\r\n", $raw_headers) as $line) {
+        if (preg_match('/^(Content-Range|Content-Length):\s*(.+)$/i', $line, $m)) {
+            header($m[1] . ': ' . trim($m[2]));
+        }
+    }
+    $disp = ($file === 'lyrics_mv.mp4' || $file === 'vocals.wav') ? 'inline' : 'attachment';
+    header('Content-Disposition: ' . $disp . '; filename="' . $file . '"');
+    echo $body;
     exit;
 }
 
