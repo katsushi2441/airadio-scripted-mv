@@ -183,7 +183,6 @@ header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.96);border-
 .logo{font-weight:900;font-size:1.08rem;text-decoration:none;color:var(--text);display:block;line-height:1.15}.logo span{color:var(--accent)}.sub{display:block;font-size:.72rem;color:var(--muted);margin-top:.18rem}
 .userbar{display:flex;gap:.7rem;align-items:center;color:var(--muted);font-size:.82rem}.userbar strong{color:var(--green)}
 .btn-sm{border:1px solid var(--border2);color:var(--muted);padding:.25rem .7rem;border-radius:6px;text-decoration:none;background:#fff}
-.api{font-size:.72rem;border-radius:5px;padding:.22rem .55rem;font-weight:800}.api-ok{background:#e6f4e0;color:var(--green)}.api-ng{background:#fbeaea;color:var(--red)}
 .container{max-width:980px;margin:0 auto;padding:1.4rem}.hero{text-align:center;padding:2rem 1rem 1.2rem}.hero h1{font-size:1.7rem;margin:.4rem 0;font-weight:900}.hero p{color:var(--muted);line-height:1.8}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:1rem;box-shadow:0 2px 8px rgba(19,35,41,.05);overflow:hidden}
 .card-head{padding:.72rem 1.2rem;border-bottom:1px solid var(--border);background:#f8fbfb;color:var(--muted);font-size:.78rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;display:flex;gap:.5rem;align-items:center}.dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
@@ -213,7 +212,7 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
     </div>
   </div>
   <div class="userbar">
-    <span id="api-status" class="api api-ng">API 未確認</span>
+    <a class="btn-sm" href="scripted-mvv.php">一覧</a>
     <?php if ($logged_in): ?><span>@<strong><?= h($session_user) ?></strong></span><a class="btn-sm" href="?logout=1">logout</a><?php else: ?><a class="btn-sm" href="?login=1">Xでログイン</a><?php endif; ?>
   </div>
 </header>
@@ -277,7 +276,6 @@ var form=document.getElementById('upload-form');
 if(form){
   form.addEventListener('submit',function(e){
     e.preventDefault();
-    refreshApiStatus();
     var btn=document.getElementById('btn-submit'); btn.disabled=true;
     fetch(PROXY+'?proxy=extract',{method:'POST',body:new FormData(form)})
       .then(r=>r.json()).then(function(d){
@@ -285,17 +283,6 @@ if(form){
         if(d.ok&&d.job_id){ currentJobId=d.job_id; document.getElementById('status-box').style.display='block'; startPoll(d.job_id); }
         else alert('登録失敗: '+(d.error||JSON.stringify(d)));
       }).catch(function(err){btn.disabled=false;alert(err.message)});
-  });
-}
-function refreshApiStatus(){
-  var el=document.getElementById('api-status');
-  if(!el) return;
-  fetch(PROXY+'?proxy=health').then(r=>r.json()).then(function(d){
-    el.textContent=d.ok?'API ●':'API ×';
-    el.className='api '+(d.ok?'api-ok':'api-ng');
-  }).catch(function(){
-    el.textContent='API ×';
-    el.className='api api-ng';
   });
 }
 function refreshJobs(){

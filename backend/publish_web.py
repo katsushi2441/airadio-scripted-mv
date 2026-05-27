@@ -83,7 +83,7 @@ def publish_job(job_id: str) -> None:
 
         item = {
             "job_id": job_id,
-            "title": job.get("title") or Path(job.get("filename") or job_id).stem,
+            "title": Path(job.get("filename") or job_id).stem,
             "filename": job.get("filename") or "",
             "created_at": job.get("created_at") or "",
             "updated_at": job.get("updated_at") or "",

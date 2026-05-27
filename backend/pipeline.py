@@ -49,6 +49,10 @@ def lrc_to_text(lrc: str) -> str:
     return "\n".join(lines) + ("\n" if lines else "")
 
 
+def filename_title(job: dict, audio: Path) -> str:
+    return Path(job.get("filename") or audio.name).stem
+
+
 def run_lyrics_pipeline(job_id: str) -> None:
     job = load_job(job_id)
     if not job:
@@ -127,6 +131,7 @@ def run_lyrics_pipeline(job_id: str) -> None:
         duration_sec = audio_duration(audio)
         scene_count = max(1, math.ceil(duration_sec / 10.0))
         mv_script = generate_mv_script(lyrics_text, job.get("filename") or audio.name, scene_count=scene_count)
+        mv_script["title"] = filename_title(job, audio)
         update_job(job_id, script=mv_script, title=mv_script.get("title"), duration_sec=duration_sec, scene_count=scene_count)
 
         job_dir = JOBS_DIR / job_id
@@ -181,6 +186,7 @@ def run_mv_from_existing_lyrics(job_id: str) -> None:
         duration_sec = audio_duration(audio)
         scene_count = max(1, math.ceil(duration_sec / 10.0))
         mv_script = generate_mv_script(lyrics_text, job.get("filename") or audio.name, scene_count=scene_count)
+        mv_script["title"] = filename_title(job, audio)
         update_job(job_id, script=mv_script, title=mv_script.get("title"), duration_sec=duration_sec, scene_count=scene_count)
 
         job_dir = JOBS_DIR / job_id
@@ -221,6 +227,7 @@ def run_rerender_pipeline(job_id: str, corrected_lrc: str) -> None:
         script = job.get("script")
         if not script:
             raise RuntimeError("MV脚本がありません。最初から生成してください。")
+        script["title"] = filename_title(job, audio)
 
         job_dir = JOBS_DIR / job_id
         image_paths = []
