@@ -30,10 +30,12 @@
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 28px}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:17px;min-height:132px}
     .band{background:var(--soft);border-left:4px solid var(--accent);padding:18px 20px;margin:24px 0;border-radius:0 10px 10px 0}
+    .kurage-promo{display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;margin:24px 0;box-shadow:0 6px 22px rgba(19,35,41,.06)}
+    .kurage-promo img{width:100%;border-radius:10px;display:block}
     .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
     .btn{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;text-decoration:none;border-radius:9px;padding:12px 18px;font-weight:900}
     .btn.secondary{background:#fff;color:var(--accent);border:1px solid var(--accent)}
-    @media(max-width:820px){.hero,.grid{grid-template-columns:1fr}h1{font-size:30px}.links{margin-left:0}.nav{align-items:flex-start;flex-wrap:wrap}}
+    @media(max-width:820px){.hero,.grid,.kurage-promo{grid-template-columns:1fr}h1{font-size:30px}.links{margin-left:0}.nav{align-items:flex-start;flex-wrap:wrap}}
   </style>
 </head>
 <body>
@@ -73,6 +75,20 @@
       <h2>Kurageから派生したAIRadio Scripted-MV</h2>
       <p>このシステムは、X投稿からショート動画を生成するKurageプロジェクトを土台にしています。Kurageで作ってきた、ジョブ管理、画像生成、動画生成、一覧表示、リール表示の仕組みを活かし、音楽ファイルを起点にしたMV生成へ発展させました。</p>
       <p>既存のAI Radio Scripted MVを、歌詞抽出、歌詞修正、タイトル修正、モデル再解析、公開用一覧、リール表示まで扱える形にバージョンアップしています。</p>
+    </section>
+
+    <section class="kurage-promo">
+      <a href="https://github.com/katsushi2441/kurage" target="_blank" rel="noopener">
+        <img src="assets/kurage.png" alt="Kurageプロジェクト">
+      </a>
+      <div>
+        <h2>元になったKurageプロジェクト</h2>
+        <p>Kurageは、X投稿をもとにAIショート動画を生成する別リポジトリのプロジェクトです。AIRadio Scripted-MVは、その開発で得た動画生成パイプラインを音楽MV生成に応用した派生プロジェクトです。</p>
+        <div class="cta">
+          <a class="btn" href="https://github.com/katsushi2441/kurage" target="_blank" rel="noopener">KurageのGitHubを見る</a>
+          <a class="btn secondary" href="https://aiknowledgecms.exbridge.jp/kuragev.php" target="_blank" rel="noopener">Kurage動画を見る</a>
+        </div>
+      </div>
     </section>
 
     <section>

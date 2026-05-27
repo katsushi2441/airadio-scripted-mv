@@ -27,6 +27,7 @@ def main() -> None:
         "auth_common.php",
         "config.php",
         "assets/kurage-icon.png",
+        "assets/kurage.png",
     ]
     with ftplib.FTP(host, timeout=60) as ftp:
         ftp.login(user, password)
