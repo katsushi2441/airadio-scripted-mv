@@ -46,6 +46,28 @@ def parse_json_from_response(text: str) -> dict:
     raise ValueError(f"Could not parse JSON: {text[:300]}")
 
 
+def fallback_script(filename: str, scene_count: int, mood: str = "lyrical, cinematic") -> dict:
+    title = re.sub(r"\.[^.]+$", "", filename).strip() or "Lyrics MV"
+    palettes = [
+        ("blue night city lights", "lonely neon street after rain"),
+        ("soft dawn sky", "quiet room with morning light"),
+        ("misty seaside", "wide ocean horizon with gentle fog"),
+        ("empty train platform", "cinematic railway platform at dusk"),
+        ("floating particles", "dreamlike light particles in dark space"),
+        ("silhouette walking", "single silhouette walking through soft backlight"),
+    ]
+    scenes = []
+    for i in range(scene_count):
+        color, place = palettes[i % len(palettes)]
+        scenes.append({
+            "index": i,
+            "visual": f"{title} の歌詞に合わせた感情的な縦型MV背景。シーン{i + 1}。",
+            "image_prompt": f"vertical 9:16 cinematic music video background, {place}, {color}, no text",
+            "duration": 5,
+        })
+    return {"title": title, "mood": mood, "scenes": scenes}
+
+
 def generate_mv_script(lyrics_text: str, filename: str = "", scene_count: int = 1) -> dict:
     system_prompt = SYSTEM_PROMPT.replace("__SCENE_COUNT__", str(scene_count))
     prompt = f"""{system_prompt}
@@ -61,15 +83,21 @@ Create visual direction JSON only."""
         "model": OLLAMA_MODEL,
         "prompt": prompt,
         "stream": False,
-        "options": {"temperature": 0.65, "num_predict": 3072},
+        "format": "json",
+        "options": {"temperature": 0.45, "num_predict": 8192},
     }
     resp = requests.post(f"{OLLAMA_URL}/api/generate", json=payload, timeout=240)
     resp.raise_for_status()
     response_text = resp.json().get("response") or ""
-    script = parse_json_from_response(response_text)
+    try:
+        script = parse_json_from_response(response_text)
+    except Exception:
+        return fallback_script(filename, scene_count)
     scenes = script.get("scenes") or []
-    if len(scenes) != scene_count:
-        raise ValueError(f"Script must have {scene_count} scenes, got {len(scenes)}")
+    if len(scenes) < scene_count:
+        scenes.extend(fallback_script(filename, scene_count - len(scenes)).get("scenes") or [])
+    scenes = scenes[:scene_count]
+    script["scenes"] = scenes
     for i, scene in enumerate(scenes):
         scene["index"] = i
         scene.setdefault("duration", 5)
