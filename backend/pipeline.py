@@ -174,6 +174,11 @@ def run_lyrics_pipeline(job_id: str) -> None:
         )
 
 
+def run_reextract_pipeline(job_id: str) -> None:
+    shutil.rmtree(OUTPUTS_DIR / job_id, ignore_errors=True)
+    run_lyrics_pipeline(job_id)
+
+
 def run_mv_from_existing_lyrics(job_id: str) -> None:
     job = load_job(job_id)
     if not job:

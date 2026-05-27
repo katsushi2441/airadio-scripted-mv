@@ -110,6 +110,22 @@ if ($proxy !== '') {
         echo $body ?: json_encode(array('ok'=>false, 'error'=>$err ?: 'rerender failed'), JSON_UNESCAPED_UNICODE);
         exit;
     }
+    if ($proxy === 'reextract' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['job_id'])) {
+        $jid = preg_replace('/[^a-zA-Z0-9]/', '', $_GET['job_id']);
+        $model = (string)($_POST['model'] ?? 'small');
+        $language = trim((string)($_POST['language'] ?? 'ja'));
+        $ch = curl_init($API . '/reextract/' . rawurlencode($jid));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, array('model' => $model, 'language' => $language));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+        $body = curl_exec($ch);
+        $err = curl_error($ch);
+        curl_close($ch);
+        echo $body ?: json_encode(array('ok'=>false, 'error'=>$err ?: 'reextract failed'), JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     if ($proxy === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['job_id'])) {
         $jid = preg_replace('/[^a-zA-Z0-9]/', '', $_GET['job_id']);
         echo json_encode(api_json('DELETE', '/job/' . $jid, null, 20), JSON_UNESCAPED_UNICODE);
@@ -197,10 +213,10 @@ textarea{width:100%;min-height:240px;border:1px solid var(--border2);border-radi
 .badge{display:inline-flex;border-radius:5px;padding:.22rem .6rem;font-size:.72rem;font-weight:900}.badge-done{background:#e6f4e0;color:var(--green)}.badge-error{background:#fbeaea;color:var(--red)}.badge-queued,.badge-separating,.badge-transcribing{background:#e0f2f7;color:var(--accent)}
 #status-box{display:none}.links a{display:inline-block;margin:.25rem .35rem .25rem 0;background:var(--accent);color:#fff;text-decoration:none;border-radius:8px;padding:.55rem .75rem;font-weight:900;font-size:.82rem}
 .video-wrap{display:none;margin-top:1rem;text-align:center}.video-wrap video{width:100%;max-width:360px;border-radius:12px;border:1px solid var(--border);box-shadow:0 6px 22px rgba(19,35,41,.16);background:#000}
-.editor{display:none;margin-top:1rem}.editor-actions{display:flex;gap:.6rem;align-items:center;margin-top:.6rem;flex-wrap:wrap}
+.editor{display:none;margin-top:1rem}.editor-actions{display:flex;gap:.6rem;align-items:center;margin-top:.6rem;flex-wrap:wrap}.reextract-grid{display:grid;grid-template-columns:160px 120px auto;gap:.6rem;align-items:end;margin:.8rem 0 1rem;padding:.8rem;border:1px solid var(--border);border-radius:8px;background:#f8fbfb}
 pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color:#cfe1ff;border-radius:8px;padding:.9rem;font-size:.78rem}
 .jobs{display:grid;gap:.5rem}.job{display:flex;align-items:center;gap:.7rem;padding:.65rem .8rem;border:1px solid var(--border);border-radius:8px;background:#f8fbfb;cursor:pointer}.job:hover{border-color:var(--accent)}.job-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.meta{color:var(--muted);font-size:.75rem}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.container{padding:1rem}header{padding:.8rem 1rem;align-items:flex-start;gap:.6rem;flex-direction:column}}
+@media(max-width:760px){.grid,.reextract-grid{grid-template-columns:1fr}.container{padding:1rem}header{padding:.8rem 1rem;align-items:flex-start;gap:.6rem;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -251,6 +267,11 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
       <div id="lrc-editor" class="editor">
         <label>タイトル</label>
         <input type="text" id="title-text" style="margin-bottom:.8rem">
+        <div class="reextract-grid">
+          <div><label>再解析モデル</label><select id="reextract-model"><option value="small">small</option><option value="base">base</option><option value="medium">medium</option><option value="large-v3">large-v3</option><option value="tiny">tiny</option></select></div>
+          <div><label>言語</label><input type="text" id="reextract-language" value="ja"></div>
+          <button id="btn-reextract" class="btn" type="button" onclick="reextractCurrent()">モデル変更して再解析</button>
+        </div>
         <label>歌詞修正（LRC）</label>
         <textarea id="lrc-text"></textarea>
         <div class="editor-actions">
@@ -337,6 +358,8 @@ function updateUI(d){
     document.getElementById('video-player').src=videoUrl;
     videoWrap.style.display='block';
     document.getElementById('title-text').value=d.title||((d.filename||'').replace(/\.[^.]+$/,''));
+    document.getElementById('reextract-model').value=d.model||'small';
+    document.getElementById('reextract-language').value=d.language||'ja';
     document.getElementById('lrc-text').value=d.lrc||'';
     editor.style.display='block';
   } else {
@@ -355,6 +378,20 @@ function rerenderCurrent(){
     .then(r=>r.json()).then(function(d){
       btn.disabled=false;
       if(d.ok){startPoll(currentJobId)}else{alert('再生成失敗: '+(d.error||JSON.stringify(d)))}
+    }).catch(function(e){btn.disabled=false;alert(e.message)});
+}
+function reextractCurrent(){
+  if(!currentJobId){alert('ジョブを選択してください');return}
+  if(!confirm('元のMP3からモデルを変えて再解析します。歌詞・画像・MP4は上書きされます。')) return;
+  var btn=document.getElementById('btn-reextract');
+  btn.disabled=true;
+  var fd=new FormData();
+  fd.append('model',document.getElementById('reextract-model').value);
+  fd.append('language',document.getElementById('reextract-language').value);
+  fetch(PROXY+'?proxy=reextract&job_id='+encodeURIComponent(currentJobId),{method:'POST',body:fd})
+    .then(r=>r.json()).then(function(d){
+      btn.disabled=false;
+      if(d.ok){document.getElementById('lrc-editor').style.display='none';startPoll(currentJobId)}else{alert('再解析失敗: '+(d.error||JSON.stringify(d)))}
     }).catch(function(e){btn.disabled=false;alert(e.message)});
 }
 function deleteJob(ev,jobId){

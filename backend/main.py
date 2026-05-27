@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from config import DEFAULT_LANGUAGE, DEFAULT_MODEL, JOBS_DIR, OUTPUTS_DIR, PORT, UPLOADS_DIR
-from pipeline import delete_job_files, load_job, run_lyrics_pipeline, run_mv_from_existing_lyrics, run_rerender_pipeline, update_job
+from pipeline import delete_job_files, load_job, run_lyrics_pipeline, run_mv_from_existing_lyrics, run_reextract_pipeline, run_rerender_pipeline, update_job
 
 app = FastAPI(title="AIRadio Lyrics Extractor API", version="1.0.0")
 
@@ -119,6 +119,28 @@ def retry_mv(job_id: str):
         raise HTTPException(status_code=404, detail="job not found")
     update_job(job_id, status="scripting", progress=40, message="MV生成を再開します", error=None, traceback=None)
     thread = threading.Thread(target=run_mv_from_existing_lyrics, args=(job_id,), daemon=True)
+    thread.start()
+    return {"ok": True, "job_id": job_id}
+
+
+@app.post("/reextract/{job_id}")
+def reextract(job_id: str, model: str = Form(DEFAULT_MODEL), language: str = Form(DEFAULT_LANGUAGE)):
+    job = load_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="job not found")
+    if not job.get("input_file") or not Path(job.get("input_file")).is_file():
+        raise HTTPException(status_code=400, detail="original audio file not found")
+    update_job(
+        job_id,
+        status="queued",
+        progress=0,
+        message="モデルを変更して再解析キューに登録しました",
+        model=model,
+        language=language,
+        error=None,
+        traceback=None,
+    )
+    thread = threading.Thread(target=run_reextract_pipeline, args=(job_id,), daemon=True)
     thread.start()
     return {"ok": True, "job_id": job_id}
 
