@@ -49,8 +49,13 @@ def lrc_to_text(lrc: str) -> str:
     return "\n".join(lines) + ("\n" if lines else "")
 
 
-def filename_title(job: dict, audio: Path) -> str:
+def title_from_filename(job: dict, audio: Path) -> str:
     return Path(job.get("filename") or audio.name).stem
+
+
+def normalize_title(title: str, fallback: str) -> str:
+    title = title.strip()
+    return title if title else fallback
 
 
 def run_lyrics_pipeline(job_id: str) -> None:
@@ -131,7 +136,7 @@ def run_lyrics_pipeline(job_id: str) -> None:
         duration_sec = audio_duration(audio)
         scene_count = max(1, math.ceil(duration_sec / 10.0))
         mv_script = generate_mv_script(lyrics_text, job.get("filename") or audio.name, scene_count=scene_count)
-        mv_script["title"] = filename_title(job, audio)
+        mv_script["title"] = title_from_filename(job, audio)
         update_job(job_id, script=mv_script, title=mv_script.get("title"), duration_sec=duration_sec, scene_count=scene_count)
 
         job_dir = JOBS_DIR / job_id
@@ -186,7 +191,7 @@ def run_mv_from_existing_lyrics(job_id: str) -> None:
         duration_sec = audio_duration(audio)
         scene_count = max(1, math.ceil(duration_sec / 10.0))
         mv_script = generate_mv_script(lyrics_text, job.get("filename") or audio.name, scene_count=scene_count)
-        mv_script["title"] = filename_title(job, audio)
+        mv_script["title"] = normalize_title(job.get("title") or "", title_from_filename(job, audio))
         update_job(job_id, script=mv_script, title=mv_script.get("title"), duration_sec=duration_sec, scene_count=scene_count)
 
         job_dir = JOBS_DIR / job_id
@@ -213,7 +218,7 @@ def delete_job_files(job_id: str) -> None:
     job_path(job_id).unlink(missing_ok=True)
 
 
-def run_rerender_pipeline(job_id: str, corrected_lrc: str) -> None:
+def run_rerender_pipeline(job_id: str, corrected_lrc: str, corrected_title: str = "") -> None:
     job = load_job(job_id)
     if not job:
         return
@@ -227,7 +232,8 @@ def run_rerender_pipeline(job_id: str, corrected_lrc: str) -> None:
         script = job.get("script")
         if not script:
             raise RuntimeError("MV脚本がありません。最初から生成してください。")
-        script["title"] = filename_title(job, audio)
+        title = normalize_title(corrected_title, normalize_title(job.get("title") or "", title_from_filename(job, audio)))
+        script["title"] = title
 
         job_dir = JOBS_DIR / job_id
         image_paths = []
@@ -245,6 +251,8 @@ def run_rerender_pipeline(job_id: str, corrected_lrc: str) -> None:
             progress=100,
             message="修正歌詞でMP4再生成完了",
             video_file=str(video_path),
+            title=title,
+            script=script,
         )
         try:
             publish_job(job_id)

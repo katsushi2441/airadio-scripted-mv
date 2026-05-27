@@ -77,6 +77,7 @@ def status(job_id: str):
         "progress": job.get("progress", 0),
         "message": job.get("message", ""),
         "filename": job.get("filename", ""),
+        "title": job.get("title") or Path(job.get("filename") or job_id).stem,
         "model": job.get("model", ""),
         "language": job.get("language", ""),
         "detected_language": job.get("detected_language"),
@@ -100,14 +101,14 @@ def status(job_id: str):
 
 
 @app.post("/rerender/{job_id}")
-def rerender(job_id: str, lrc: str = Form(...)):
+def rerender(job_id: str, lrc: str = Form(...), title: str = Form("")):
     job = load_job(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="job not found")
     if not lrc.strip():
         raise HTTPException(status_code=400, detail="lrc is required")
     update_job(job_id, status="rendering", progress=82, message="再生成キューに登録しました")
-    thread = threading.Thread(target=run_rerender_pipeline, args=(job_id, lrc), daemon=True)
+    thread = threading.Thread(target=run_rerender_pipeline, args=(job_id, lrc, title), daemon=True)
     thread.start()
     return {"ok": True, "job_id": job_id}
 

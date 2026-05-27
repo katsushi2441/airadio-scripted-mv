@@ -97,11 +97,12 @@ if ($proxy !== '') {
     if ($proxy === 'rerender' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['job_id'])) {
         $jid = preg_replace('/[^a-zA-Z0-9]/', '', $_GET['job_id']);
         $lrc = (string)($_POST['lrc'] ?? '');
+        $title = trim((string)($_POST['title'] ?? ''));
         $ch = curl_init($API . '/rerender/' . rawurlencode($jid));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, array('lrc' => $lrc));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, array('lrc' => $lrc, 'title' => $title));
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
         $body = curl_exec($ch);
         $err = curl_error($ch);
@@ -248,10 +249,12 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
       <div id="result-links" class="links" style="display:none"></div>
       <div id="video-wrap" class="video-wrap"><video id="video-player" controls playsinline></video></div>
       <div id="lrc-editor" class="editor">
+        <label>タイトル</label>
+        <input type="text" id="title-text" style="margin-bottom:.8rem">
         <label>歌詞修正（LRC）</label>
         <textarea id="lrc-text"></textarea>
         <div class="editor-actions">
-          <button id="btn-rerender" class="btn" type="button" onclick="rerenderCurrent()">修正してMP4再生成</button>
+          <button id="btn-rerender" class="btn" type="button" onclick="rerenderCurrent()">タイトル・歌詞を修正してMP4再生成</button>
         </div>
       </div>
       <div id="error" style="display:none;color:var(--red);margin-top:.7rem"></div>
@@ -333,6 +336,7 @@ function updateUI(d){
     var videoUrl=PROXY+'?job_id='+encodeURIComponent(d.job_id)+'&file=lyrics_mv.mp4&t='+(new Date().getTime());
     document.getElementById('video-player').src=videoUrl;
     videoWrap.style.display='block';
+    document.getElementById('title-text').value=d.title||((d.filename||'').replace(/\.[^.]+$/,''));
     document.getElementById('lrc-text').value=d.lrc||'';
     editor.style.display='block';
   } else {
@@ -346,6 +350,7 @@ function rerenderCurrent(){
   btn.disabled=true;
   var fd=new FormData();
   fd.append('lrc',document.getElementById('lrc-text').value);
+  fd.append('title',document.getElementById('title-text').value);
   fetch(PROXY+'?proxy=rerender&job_id='+encodeURIComponent(currentJobId),{method:'POST',body:fd})
     .then(r=>r.json()).then(function(d){
       btn.disabled=false;
