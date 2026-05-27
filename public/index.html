@@ -4,51 +4,86 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kurageプロジェクト AIRadio Scripted-MV</title>
-  <meta name="description" content="MP3から歌詞を抽出し、AIで脚本・画像を生成して、歌詞字幕付きミュージックビデオを作るKurageプロジェクトのAIRadio Scripted-MV。">
+  <meta name="description" content="Kurageプロジェクトから派生した、MP3から歌詞抽出、AI脚本、画像生成、歌詞字幕付きMV生成、歌詞とタイトル修正、リール表示まで行うAIRadio Scripted-MV。">
   <style>
-    :root{--bg:#f4f9fb;--surface:#fff;--text:#132329;--muted:#5a6a72;--accent:#007f96;--accent2:#35b99b;--border:#dbe5e8}
-    *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#f8fcff 0%,#edf8fb 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
-    header{background:rgba(255,255,255,.9);border-bottom:1px solid var(--border);padding:18px 22px}
-    .brand{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:12px}
-    .brand img{width:54px;height:54px;border-radius:50%;object-fit:cover;box-shadow:0 2px 10px rgba(0,127,150,.18)}
-    .brand strong{display:block;font-size:20px;line-height:1.2}.brand span{color:var(--muted);font-size:13px}
-    main{max-width:1040px;margin:0 auto;padding:48px 22px}
-    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:center}
-    h1{font-size:42px;line-height:1.18;margin:0 0 18px;letter-spacing:0;font-weight:900}
-    p{font-size:16px;line-height:1.9;color:var(--muted);margin:0 0 20px}
-    .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:0 8px 28px rgba(19,35,41,.08)}
-    .steps{display:grid;gap:12px;margin-top:18px}.step{padding:13px 14px;border:1px solid var(--border);border-radius:10px;background:#fbfeff;font-weight:800}.step span{color:var(--accent);margin-right:8px}
-    .btn{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;text-decoration:none;border-radius:10px;padding:13px 20px;font-weight:900}.btn:hover{background:#006578}
-    .note{font-size:13px;color:var(--muted);margin-top:12px}
-    @media(max-width:760px){.hero{grid-template-columns:1fr}h1{font-size:31px}main{padding-top:30px}}
+    :root{--bg:#f5f8f9;--surface:#fff;--text:#132329;--muted:#5a6a72;--accent:#007f96;--accent2:#35b99b;--border:#dbe5e8;--soft:#e8f8fb}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;font-size:15px}
+    header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);padding:14px 20px}
+    .nav{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:12px}
+    .nav img{width:46px;height:46px;border-radius:50%;object-fit:cover;box-shadow:0 2px 10px rgba(0,127,150,.18)}
+    .brand{font-weight:900;font-size:18px;line-height:1.25}.brand span{display:block;color:var(--muted);font-size:12px;font-weight:700;margin-top:2px}
+    .links{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+    .link{border:1px solid var(--accent);color:var(--accent);background:#fff;border-radius:8px;padding:7px 12px;text-decoration:none;font-size:13px;font-weight:900}
+    .link.primary{background:var(--accent);color:#fff}
+    main{max-width:1080px;margin:0 auto;padding:34px 20px 70px}
+    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;margin-bottom:26px}
+    h1{font-size:38px;line-height:1.2;margin:0 0 16px;font-weight:900;letter-spacing:0}
+    h2{font-size:22px;margin:0 0 14px;font-weight:900}
+    h3{font-size:15px;margin:0 0 8px;font-weight:900;color:var(--accent)}
+    p{line-height:1.85;color:var(--muted);margin:0 0 15px}
+    .lead{font-size:17px;color:#34444b}
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;box-shadow:0 6px 22px rgba(19,35,41,.06)}
+    .steps{display:grid;gap:10px}.step{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--border);border-radius:10px;background:#fbfeff}
+    .num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:900;flex-shrink:0}
+    .step strong{display:block;margin-bottom:2px}.step span:last-child{color:var(--muted);line-height:1.6}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0 28px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:17px;min-height:132px}
+    .band{background:var(--soft);border-left:4px solid var(--accent);padding:18px 20px;margin:24px 0;border-radius:0 10px 10px 0}
+    .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:#fff;text-decoration:none;border-radius:9px;padding:12px 18px;font-weight:900}
+    .btn.secondary{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+    @media(max-width:820px){.hero,.grid{grid-template-columns:1fr}h1{font-size:30px}.links{margin-left:0}.nav{align-items:flex-start;flex-wrap:wrap}}
   </style>
 </head>
 <body>
   <header>
-    <div class="brand">
+    <div class="nav">
       <img src="assets/kurage-icon.png" alt="Kurage">
-      <div>
-        <strong>Kurageプロジェクト AIRadio Scripted-MV</strong>
-        <span>AIショート動画生成から派生した、歌詞字幕付きミュージックビデオ生成システム</span>
+      <div class="brand">Kurageプロジェクト AIRadio Scripted-MV<span>歌詞字幕付きミュージックビデオ生成システム</span></div>
+      <div class="links">
+        <a class="link" href="scripted-mvv.php">生成済みMV一覧</a>
+        <a class="link primary" href="scripted-mv.php">生成ツール</a>
       </div>
     </div>
   </header>
+
   <main>
     <section class="hero">
       <div>
         <h1>音楽ファイルから、歌詞字幕付きMVを生成する。</h1>
-        <p>MP3をアップロードすると、歌詞抽出、曲の長さに応じた映像脚本生成、画像生成、HyperFramesによる動画生成までを一連のパイプラインで実行します。</p>
-        <a class="btn" href="scripted-mv.php">生成ツールを開く</a>
-        <div class="note">管理者ログイン後に利用できます。</div>
+        <p class="lead">AIRadio Scripted-MVは、MP3をアップロードして、歌詞抽出、映像脚本生成、画像生成、HyperFramesによるMV生成までを一連の流れで実行するシステムです。</p>
+        <p>生成後は、歌詞やタイトルを画面上で修正し、その内容を反映したMP4を再生成できます。Whisperモデルを変更して、元のMP3から再解析することもできます。</p>
+        <div class="cta">
+          <a class="btn" href="scripted-mv.php">生成ツールを開く</a>
+          <a class="btn secondary" href="scripted-mvv.php">MV一覧を見る</a>
+        </div>
       </div>
       <div class="panel">
         <div class="steps">
-          <div class="step"><span>1</span>MP3アップロード</div>
-          <div class="step"><span>2</span>Demucs + Whisperで歌詞抽出</div>
-          <div class="step"><span>3</span>歌詞から映像脚本を自動生成</div>
-          <div class="step"><span>4</span>10秒に1枚の目安で画像生成</div>
-          <div class="step"><span>5</span>HyperFramesで字幕付きMV生成</div>
+          <div class="step"><span class="num">1</span><span><strong>MP3アップロード</strong>音楽ファイルを登録し、非同期ジョブとして解析を開始します。</span></div>
+          <div class="step"><span class="num">2</span><span><strong>Demucs + faster-whisper</strong>ボーカル分離後、VADを使わず歌詞を最後まで抽出します。</span></div>
+          <div class="step"><span class="num">3</span><span><strong>AI脚本と画像生成</strong>曲の長さに合わせ、約10秒に1枚の映像背景を生成します。</span></div>
+          <div class="step"><span class="num">4</span><span><strong>HyperFramesでMP4生成</strong>元の音楽を流し、歌詞字幕付き縦型MVとして書き出します。</span></div>
         </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <h2>Kurageから派生したAIRadio Scripted-MV</h2>
+      <p>このシステムは、X投稿からショート動画を生成するKurageプロジェクトを土台にしています。Kurageで作ってきた、ジョブ管理、画像生成、動画生成、一覧表示、リール表示の仕組みを活かし、音楽ファイルを起点にしたMV生成へ発展させました。</p>
+      <p>既存のAI Radio Scripted MVを、歌詞抽出、歌詞修正、タイトル修正、モデル再解析、公開用一覧、リール表示まで扱える形にバージョンアップしています。</p>
+    </section>
+
+    <section>
+      <h2>主な機能</h2>
+      <div class="grid">
+        <div class="card"><h3>歌詞抽出</h3><p>Demucsでボーカルを分離し、faster-whisperでSRT、LRC、TXTを生成します。tiny、base、small、medium、large-v3を選択できます。</p></div>
+        <div class="card"><h3>モデル変更再解析</h3><p>生成済みジョブでも、元MP3からモデルを変えて再解析できます。歌詞、画像、MP4は同じジョブIDで更新されます。</p></div>
+        <div class="card"><h3>歌詞とタイトル修正</h3><p>生成後にLRC歌詞とタイトルを編集し、修正内容を反映したMP4を再生成できます。</p></div>
+        <div class="card"><h3>脚本・画像生成</h3><p>歌詞の雰囲気から映像脚本と画像プロンプトを作り、縦型MV用の背景画像を生成します。</p></div>
+        <div class="card"><h3>動画生成</h3><p>HyperFramesで元音源をそのまま使い、歌詞字幕付きの縦型MP4を生成します。</p></div>
+        <div class="card"><h3>一覧・リール表示</h3><p>公開済みMVを一覧表示し、詳細再生やリール形式で連続視聴できます。一覧サムネイルは1秒地点を表示します。</p></div>
       </div>
     </section>
   </main>
