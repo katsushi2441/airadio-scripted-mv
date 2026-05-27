@@ -3,27 +3,23 @@
 
 ## Relationship to AIRadio
 
-This repository is an **optional plugin for AIRadio Core**.
+This repository provides AIRadio-related web tools.
 
-AIRadio handles:
-- Script generation
-- Text-to-speech
-- Audio creation
+The current main product is **Lyrics Extractor**:
 
-This plugin handles:
-- Video footage preparation
-- Script-based music video generation
+- Upload a music file from the web UI
+- Queue the analysis on the RTX/FastAPI server
+- Separate vocals with Demucs
+- Generate SRT/LRC/TXT with faster-whisper
 
-Each component can be used independently,  
-but together they form a complete AI media pipeline.
+Each component can be used independently, but together they form a complete
+AI media pipeline.
 
 ---
 
 ## Use Cases
 
-- AI-generated music videos
 - Narrated lyric videos
-- Message-driven short videos
 - Shareable AI audio content for social platforms
 - Lyric extraction from music files using Demucs + faster-whisper
 
@@ -31,24 +27,25 @@ but together they form a complete AI media pipeline.
 
 ## Philosophy
 
-This project is part of the AIRadio ecosystem.
+This project is part of the AIRadio ecosystem.  It is intentionally split
+into a small web front end, a Python backend, and reusable processing tools.
 
-Instead of a single monolithic tool,  
-AIRadio is built as a set of small, composable plugins.
+## Directory Layout
 
-Each plugin:
-- Has a clear responsibility
-- Can evolve independently
-- Gains more value when combined with others
-
-Future updates will focus on expanding subtitle customization,
-including font size, positioning, and visual layout templates.
+```text
+public/          Web公開PHP
+backend/         FastAPI queue and job runner
+tools/           CLI processing tools
+storage/         Local jobs, uploads, and generated files
+docs/            Documentation
+deploy/          Deployment helpers
+```
 
 ---
 
 ## Lyrics Extractor
 
-`lyrics-extractor.php` provides a browser upload flow for music files.
+`public/lyrics-extractor.php` provides a browser upload flow for music files.
 The web page posts the audio to the FastAPI backend on the RTX server,
 queues the job, and then shows progress until `vocals.wav`, `lyrics.srt`,
 `lyrics.lrc`, and `lyrics.txt` are ready.
@@ -64,22 +61,18 @@ cd /home/kojima/exdirect/airadio-scripted-mv/backend
 uvicorn main:app --host 0.0.0.0 --port 18201
 ```
 
+Web deployment uploads the contents of `public/` to:
+
+```text
+/web/airadio-scripted-mv_exbridge_jp
+```
+
 ---
 
 ## Demo
 
-This project is currently demonstrated at:
+This project is currently available at:
 https://airadio-scripted-mv.exbridge.jp/
-
-A demo video showing the full pipeline is also available on YouTube.
-
----
-
-## Whitepaper
-
-- [AIRadio Scripted MV Whitepaper](docs/whitepaper.md)
-
-
 
 ---
 
