@@ -103,8 +103,6 @@ if ($detail) {
         <div class="meta"><?= h($v['filename'] ?? '') ?><br><?= h($v['updated_at'] ?? $v['created_at'] ?? '') ?><?php if (!empty($v['duration_sec'])): ?> / <?= h((string)round((float)$v['duration_sec'])) ?>秒<?php endif; ?><?php if (!empty($v['scene_count'])): ?> / 画像<?= h($v['scene_count']) ?>枚<?php endif; ?></div>
         <div class="actions">
           <a class="btn primary" href="<?= h($THIS_FILE . '?id=' . urlencode($v['job_id'] ?? '')) ?>">再生</a>
-          <a class="btn" href="<?= h($v['video_url'] ?? '') ?>" download>MP4</a>
-          <a class="btn" href="<?= h($v['lrc_url'] ?? '') ?>">LRC</a>
         </div>
       </div>
     </article>

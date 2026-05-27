@@ -38,6 +38,17 @@ def update_job(job_id: str, **kwargs) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def lrc_to_text(lrc: str) -> str:
+    lines = []
+    for line in lrc.splitlines():
+        text = line.strip()
+        while text.startswith("[") and "]" in text:
+            text = text.split("]", 1)[1].strip()
+        if text:
+            lines.append(text)
+    return "\n".join(lines) + ("\n" if lines else "")
+
+
 def run_lyrics_pipeline(job_id: str) -> None:
     job = load_job(job_id)
     if not job:
@@ -205,6 +216,7 @@ def run_rerender_pipeline(job_id: str, corrected_lrc: str) -> None:
         out_dir = OUTPUTS_DIR / job_id
         lrc_path = out_dir / "lyrics.lrc"
         lrc_path.write_text(corrected_lrc.strip() + "\n", encoding="utf-8")
+        (out_dir / "lyrics.txt").write_text(lrc_to_text(corrected_lrc), encoding="utf-8")
 
         script = job.get("script")
         if not script:
