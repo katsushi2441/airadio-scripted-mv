@@ -11,8 +11,8 @@ The current main product is **Kurageプロジェクト AIRadio Scripted-MV**:
 - Queue the analysis on the RTX/FastAPI server
 - Separate vocals with Demucs
 - Generate SRT/LRC/TXT with faster-whisper
-- Generate a 12-scene visual script from lyrics
-- Generate 12 images
+- Generate a visual script from lyrics
+- Generate images at roughly one image per 10 seconds
 - Render a lyric-subtitled music video with HyperFrames
 
 Each component can be used independently, but together they form a complete

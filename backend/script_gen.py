@@ -9,7 +9,7 @@ from config import OLLAMA_MODEL, OLLAMA_URL
 
 
 SYSTEM_PROMPT = """You are a Japanese music video visual director.
-Create visual scenes for a vertical lyric music video.
+Create exactly __SCENE_COUNT__ visual scenes for a vertical lyric music video.
 
 Return ONLY JSON. No markdown.
 
@@ -17,7 +17,7 @@ Required format:
 {"title":"MV title in Japanese under 30 chars","mood":"overall mood","scenes":[{"index":0,"visual":"日本語の映像意図","image_prompt":"English vertical 9:16 cinematic music video background, no text, no subtitles","duration":5}]}
 
 Rules:
-- Create exactly {scene_count} scenes.
+- Create exactly __SCENE_COUNT__ scenes.
 - image_prompt must be English.
 - Do not include text, lyrics, captions, subtitles, letters, logos, or watermarks in images.
 - Use the lyrics only to infer mood, story, colors, locations, and emotional progression.
@@ -46,8 +46,8 @@ def parse_json_from_response(text: str) -> dict:
     raise ValueError(f"Could not parse JSON: {text[:300]}")
 
 
-def generate_mv_script(lyrics_text: str, filename: str = "", scene_count: int = 12) -> dict:
-    system_prompt = SYSTEM_PROMPT.format(scene_count=scene_count)
+def generate_mv_script(lyrics_text: str, filename: str = "", scene_count: int = 1) -> dict:
+    system_prompt = SYSTEM_PROMPT.replace("__SCENE_COUNT__", str(scene_count))
     prompt = f"""{system_prompt}
 
 Song file: {filename}

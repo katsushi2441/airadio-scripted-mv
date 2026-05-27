@@ -144,13 +144,7 @@ if (isset($_GET['file'], $_GET['job_id'])) {
     exit;
 }
 
-$health = api_json('GET', '/health', null, 5);
-$api_ok = !empty($health['ok']);
-$recent_jobs = array();
-if ($is_admin) {
-    $jobs = api_json('GET', '/jobs?limit=20', null, 10);
-    $recent_jobs = $jobs['jobs'] ?? array();
-}
+$api_ok = null;
 ?><!doctype html>
 <html lang="ja">
 <head>
@@ -195,7 +189,7 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
     </div>
   </div>
   <div class="userbar">
-    <span class="api <?= $api_ok ? 'api-ok' : 'api-ng' ?>"><?= $api_ok ? 'API ●' : 'API ×' ?></span>
+    <span id="api-status" class="api api-ng">API ...</span>
     <?php if ($logged_in): ?><span>@<strong><?= h($session_user) ?></strong></span><a class="btn-sm" href="?logout=1">logout</a><?php else: ?><a class="btn-sm" href="?login=1">Xでログイン</a><?php endif; ?>
   </div>
 </header>
@@ -242,21 +236,10 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
     </div>
   </section>
 
-  <?php if (count($recent_jobs) > 0): ?>
   <section class="card">
     <div class="card-head"><span class="dot"></span> Recent Jobs</div>
-    <div class="card-body"><div class="jobs">
-      <?php foreach ($recent_jobs as $job): ?>
-      <div class="job" data-job-id="<?= h($job['job_id']) ?>" onclick="loadJob('<?= h($job['job_id']) ?>')">
-        <span class="badge badge-<?= h($job['status'] ?: 'queued') ?>"><?= h($job['status'] ?: '?') ?></span>
-        <span class="job-title"><?= h($job['filename'] ?: $job['job_id']) ?></span>
-        <span class="meta"><?= h(substr($job['created_at'] ?: '', 5, 11)) ?></span>
-        <button class="btn btn-danger btn-mini" type="button" onclick="deleteJob(event,'<?= h($job['job_id']) ?>')">削除</button>
-      </div>
-      <?php endforeach; ?>
-    </div></div>
+    <div class="card-body"><div class="jobs" id="jobs-list"><div class="hint">読み込み中...</div></div></div>
   </section>
-  <?php endif; ?>
 <?php endif; ?>
 </main>
 <script>
@@ -278,6 +261,41 @@ if(form){
         else alert('登録失敗: '+(d.error||JSON.stringify(d)));
       }).catch(function(err){btn.disabled=false;alert(err.message)});
   });
+}
+document.addEventListener('DOMContentLoaded',function(){
+  refreshApiStatus();
+  refreshJobs();
+});
+function refreshApiStatus(){
+  var el=document.getElementById('api-status');
+  if(!el) return;
+  fetch(PROXY+'?proxy=health').then(r=>r.json()).then(function(d){
+    el.textContent=d.ok?'API ●':'API ×';
+    el.className='api '+(d.ok?'api-ok':'api-ng');
+  }).catch(function(){
+    el.textContent='API ×';
+    el.className='api api-ng';
+  });
+}
+function refreshJobs(){
+  var list=document.getElementById('jobs-list');
+  if(!list) return;
+  fetch(PROXY+'?proxy=jobs').then(r=>r.json()).then(function(d){
+    var jobs=d.jobs||[];
+    if(!jobs.length){list.innerHTML='<div class="hint">まだジョブはありません。</div>';return}
+    list.innerHTML=jobs.map(function(j){
+      var status=j.status||'?';
+      var title=escapeHtml(j.filename||j.job_id);
+      var created=escapeHtml((j.created_at||'').substring(5,16));
+      var id=escapeHtml(j.job_id);
+      return '<div class="job" data-job-id="'+id+'" onclick="loadJob(&quot;'+id+'&quot;)">'
+        + '<span class="badge badge-'+escapeHtml(status)+'">'+escapeHtml(status)+'</span>'
+        + '<span class="job-title">'+title+'</span>'
+        + '<span class="meta">'+created+'</span>'
+        + '<button class="btn btn-danger btn-mini" type="button" onclick="deleteJob(event,&quot;'+id+'&quot;)">削除</button>'
+        + '</div>';
+    }).join('');
+  }).catch(function(){list.innerHTML='<div class="hint">Recent Jobsを取得できませんでした。</div>';});
 }
 function poll(jobId){
   fetch(PROXY+'?proxy=status&job_id='+encodeURIComponent(jobId)).then(r=>r.json()).then(updateUI).catch(console.error);
@@ -335,10 +353,14 @@ function deleteJob(ev,jobId){
         var row=document.querySelector('[data-job-id="'+jobId+'"]');
         if(row) row.remove();
         if(currentJobId===jobId){currentJobId=null;document.getElementById('status-box').style.display='none';}
+        refreshJobs();
       }else{
         alert('削除失敗: '+(d.error||JSON.stringify(d)));
       }
     }).catch(function(e){alert(e.message)});
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];});
 }
 </script>
 </body>
