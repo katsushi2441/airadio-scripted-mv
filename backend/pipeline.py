@@ -148,6 +148,37 @@ def run_lyrics_pipeline(job_id: str) -> None:
         )
 
 
+def run_mv_from_existing_lyrics(job_id: str) -> None:
+    job = load_job(job_id)
+    if not job:
+        return
+    try:
+        audio = Path(job["input_file"])
+        out_dir = OUTPUTS_DIR / job_id
+        lyrics_text_path = out_dir / "lyrics.txt"
+        lrc_path = out_dir / "lyrics.lrc"
+        lyrics_text = lyrics_text_path.read_text(encoding="utf-8") if lyrics_text_path.exists() else ""
+        if not lyrics_text.strip():
+            raise RuntimeError("歌詞テキストが空です。最初から生成してください。")
+
+        update_job(job_id, status="scripting", progress=40, message="既存歌詞からMV脚本を再生成中", error=None, traceback=None)
+        duration_sec = audio_duration(audio)
+        scene_count = max(1, math.ceil(duration_sec / 10.0))
+        mv_script = generate_mv_script(lyrics_text, job.get("filename") or audio.name, scene_count=scene_count)
+        update_job(job_id, script=mv_script, title=mv_script.get("title"), duration_sec=duration_sec, scene_count=scene_count)
+
+        job_dir = JOBS_DIR / job_id
+        update_job(job_id, status="imaging", progress=55, message=f"MV用画像を{scene_count}枚生成中")
+        image_paths = generate_scene_images(mv_script.get("scenes") or [], job_dir)
+        update_job(job_id, image_count=len(image_paths), progress=78)
+
+        update_job(job_id, status="rendering", progress=85, message="HyperFramesで歌詞字幕付きMVを生成中")
+        video_path = generate_mv_video(mv_script, image_paths, audio, lrc_path, job_dir)
+        update_job(job_id, status="done", progress=100, message="歌詞字幕付きMV生成完了", video_file=str(video_path), output_dir=str(out_dir))
+    except Exception as exc:
+        update_job(job_id, status="error", progress=100, message="MV生成に失敗しました", error=str(exc), traceback=traceback.format_exc())
+
+
 def delete_job_files(job_id: str) -> None:
     job = load_job(job_id)
     if job and job.get("input_file"):
