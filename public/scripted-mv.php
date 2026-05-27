@@ -19,6 +19,9 @@ if (isset($_GET['logout'])) {
     header('Location: ' . url2ai_auth_logout_url('https://airadio-scripted-mv.exbridge.jp/' . $THIS_FILE));
     exit;
 }
+if (session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
+}
 
 function h($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 
