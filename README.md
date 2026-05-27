@@ -5,12 +5,15 @@
 
 This repository provides AIRadio-related web tools.
 
-The current main product is **Lyrics Extractor**:
+The current main product is **Lyrics Subtitled Music Video Generator**:
 
 - Upload a music file from the web UI
 - Queue the analysis on the RTX/FastAPI server
 - Separate vocals with Demucs
 - Generate SRT/LRC/TXT with faster-whisper
+- Generate a 12-scene visual script from lyrics
+- Generate 12 images
+- Render a lyric-subtitled music video with HyperFrames
 
 Each component can be used independently, but together they form a complete
 AI media pipeline.
@@ -43,12 +46,12 @@ deploy/          Deployment helpers
 
 ---
 
-## Lyrics Extractor
+## Lyrics MV Generator
 
 `public/lyrics-extractor.php` provides a browser upload flow for music files.
 The web page posts the audio to the FastAPI backend on the RTX server,
 queues the job, and then shows progress until `vocals.wav`, `lyrics.srt`,
-`lyrics.lrc`, and `lyrics.txt` are ready.
+`lyrics.lrc`, `lyrics.txt`, and `lyrics_mv.mp4` are ready.
 
 CLI usage is documented in:
 

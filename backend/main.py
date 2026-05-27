@@ -86,6 +86,7 @@ def status(job_id: str):
         "error": job.get("error"),
         "log": job.get("log", ""),
         "files": {
+            "video": f"/file/{job_id}/lyrics_mv.mp4",
             "vocals": f"/file/{job_id}/vocals.wav",
             "srt": f"/file/{job_id}/lyrics.srt",
             "lrc": f"/file/{job_id}/lyrics.lrc",
@@ -117,21 +118,26 @@ def jobs(limit: int = 20):
 
 @app.get("/file/{job_id}/{name}")
 def file(job_id: str, name: str):
-    allowed = {"vocals.wav", "lyrics.srt", "lyrics.lrc", "lyrics.txt", "metadata.json"}
+    allowed = {"lyrics_mv.mp4", "vocals.wav", "lyrics.srt", "lyrics.lrc", "lyrics.txt", "metadata.json"}
     if name not in allowed:
         raise HTTPException(status_code=404, detail="file not found")
-    path = OUTPUTS_DIR / job_id / name
-    if not path.exists():
+    if name == "lyrics_mv.mp4":
+        job = load_job(job_id)
+        path = Path(job.get("video_file", "")) if job else Path("")
+    else:
+        path = OUTPUTS_DIR / job_id / name
+    if not path.is_file():
         raise HTTPException(status_code=404, detail="file not found")
     media = "application/octet-stream"
     if name.endswith(".txt") or name.endswith(".srt") or name.endswith(".lrc") or name.endswith(".json"):
         media = "text/plain; charset=utf-8"
     if name.endswith(".wav"):
         media = "audio/wav"
+    if name.endswith(".mp4"):
+        media = "video/mp4"
     return FileResponse(path=str(path), media_type=media, filename=name)
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=PORT)
-

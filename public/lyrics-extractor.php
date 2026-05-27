@@ -107,7 +107,7 @@ if (isset($_GET['file'], $_GET['job_id'])) {
     if (!$is_admin) { http_response_code(403); echo 'admin login required'; exit; }
     $jid = preg_replace('/[^a-zA-Z0-9]/', '', $_GET['job_id']);
     $file = basename((string)$_GET['file']);
-    $allowed = array('vocals.wav', 'lyrics.srt', 'lyrics.lrc', 'lyrics.txt', 'metadata.json');
+    $allowed = array('lyrics_mv.mp4', 'vocals.wav', 'lyrics.srt', 'lyrics.lrc', 'lyrics.txt', 'metadata.json');
     if (!in_array($file, $allowed, true)) { http_response_code(404); exit; }
     $url = $API . '/file/' . rawurlencode($jid) . '/' . rawurlencode($file);
     $ch = curl_init($url);
@@ -162,7 +162,7 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
 </head>
 <body>
 <header>
-  <div><a class="logo" href="<?= h($THIS_FILE) ?>"><span>AIRadio</span> Lyrics Extractor</a><span class="sub">Demucs + faster-whisper</span></div>
+    <div><a class="logo" href="<?= h($THIS_FILE) ?>"><span>AIRadio</span> Lyrics MV</a><span class="sub">Demucs + Whisper + HyperFrames</span></div>
   <div class="userbar">
     <span class="api <?= $api_ok ? 'api-ok' : 'api-ng' ?>"><?= $api_ok ? 'API ●' : 'API ×' ?></span>
     <?php if ($logged_in): ?><span>@<strong><?= h($session_user) ?></strong></span><a class="btn-sm" href="?logout=1">logout</a><?php else: ?><a class="btn-sm" href="?login=1">Xでログイン</a><?php endif; ?>
@@ -170,12 +170,12 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
 </header>
 <main class="container">
 <?php if (!$logged_in): ?>
-  <section class="hero"><h1>曲ファイルから歌詞データを生成</h1><p>管理者ログイン後、MP3をアップロードして解析できます。</p></section>
+  <section class="hero"><h1>曲ファイルから歌詞字幕付きMVを生成</h1><p>管理者ログイン後、MP3をアップロードして生成できます。</p></section>
   <section class="card"><div class="card-body" style="text-align:center"><a class="btn" href="?login=1">Xでログイン</a></div></section>
 <?php elseif (!$is_admin): ?>
   <section class="card"><div class="card-body">管理者アカウント <strong>xb_bittensor</strong> でログインしてください。</div></section>
 <?php else: ?>
-  <section class="hero"><h1>曲ファイルから SRT / LRC を生成</h1><p>音源をアップロードすると、RTXサーバのキューで Demucs と faster-whisper が非同期処理します。</p></section>
+  <section class="hero"><h1>歌詞字幕付きミュージックビデオ生成</h1><p>MP3をアップロードすると、歌詞抽出、脚本生成、画像12枚生成、HyperFrames動画生成まで非同期で実行します。</p></section>
   <section class="card">
     <div class="card-head"><span class="dot"></span> Upload</div>
     <div class="card-body">
@@ -186,7 +186,7 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
           <div><label>言語</label><input type="text" name="language" value="ja"></div>
           <button id="btn-submit" class="btn" type="submit">解析開始</button>
         </div>
-        <div class="hint">生成物: vocals.wav / lyrics.srt / lyrics.lrc / lyrics.txt / metadata.json</div>
+        <div class="hint">生成物: lyrics_mv.mp4 / vocals.wav / lyrics.srt / lyrics.lrc / lyrics.txt</div>
       </form>
     </div>
   </section>
@@ -256,7 +256,7 @@ function updateUI(d){
   var links=document.getElementById('result-links');
   if(status==='done'){
     stopPoll(); err.style.display='none'; links.style.display='block';
-    var files=['vocals.wav','lyrics.srt','lyrics.lrc','lyrics.txt','metadata.json'];
+    var files=['lyrics_mv.mp4','vocals.wav','lyrics.srt','lyrics.lrc','lyrics.txt','metadata.json'];
     links.innerHTML=files.map(function(f){return '<a href="'+PROXY+'?job_id='+encodeURIComponent(d.job_id)+'&file='+encodeURIComponent(f)+'">'+f+'</a>'}).join('');
   } else { links.style.display='none'; }
 }

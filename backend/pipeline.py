@@ -9,6 +9,9 @@ import traceback
 from pathlib import Path
 
 from config import BASE_DIR, JOBS_DIR, OUTPUTS_DIR, WORK_DIR
+from image_gen import generate_scene_images
+from script_gen import generate_mv_script
+from video_gen import generate_mv_video
 
 
 def job_path(job_id: str) -> Path:
@@ -47,7 +50,7 @@ def run_lyrics_pipeline(job_id: str) -> None:
     log_lines: list[str] = []
 
     try:
-        update_job(job_id, status="separating", progress=20, message="Demucsでボーカルを分離中")
+        update_job(job_id, status="separating", progress=10, message="Demucsでボーカルを分離中")
         out_dir.mkdir(parents=True, exist_ok=True)
 
         cmd = [
@@ -79,7 +82,7 @@ def run_lyrics_pipeline(job_id: str) -> None:
             log_lines.append(line)
             joined = "\n".join(log_lines[-80:])
             if "WhisperModel" in line or "transcribe" in line:
-                update_job(job_id, status="transcribing", progress=70, message="faster-whisperで歌詞を解析中", log=joined)
+                update_job(job_id, status="transcribing", progress=25, message="faster-whisperで歌詞を解析中", log=joined)
             else:
                 update_job(job_id, log=joined)
 
@@ -92,11 +95,39 @@ def run_lyrics_pipeline(job_id: str) -> None:
         if meta_path.exists():
             meta = json.loads(meta_path.read_text(encoding="utf-8"))
 
+        lyrics_text_path = out_dir / "lyrics.txt"
+        lrc_path = out_dir / "lyrics.lrc"
+        lyrics_text = lyrics_text_path.read_text(encoding="utf-8") if lyrics_text_path.exists() else ""
+        if not lyrics_text.strip():
+            raise RuntimeError("歌詞テキストが空です。歌声認識に失敗した可能性があります。")
+
+        update_job(
+            job_id,
+            status="scripting",
+            progress=40,
+            message="歌詞からMV脚本と画像プロンプトを生成中",
+            output_dir=str(out_dir),
+            segments=meta.get("segments"),
+            detected_language=meta.get("language"),
+            log="\n".join(log_lines[-120:]),
+        )
+        mv_script = generate_mv_script(lyrics_text, job.get("filename") or audio.name)
+        update_job(job_id, script=mv_script, title=mv_script.get("title"))
+
+        job_dir = JOBS_DIR / job_id
+        update_job(job_id, status="imaging", progress=55, message="MV用画像を12枚生成中")
+        image_paths = generate_scene_images(mv_script.get("scenes") or [], job_dir)
+        update_job(job_id, image_count=len(image_paths), progress=78)
+
+        update_job(job_id, status="rendering", progress=85, message="HyperFramesで歌詞字幕付きMVを生成中")
+        video_path = generate_mv_video(mv_script, image_paths, audio, lrc_path, job_dir)
+
         update_job(
             job_id,
             status="done",
             progress=100,
-            message="歌詞データ生成完了",
+            message="歌詞字幕付きMV生成完了",
+            video_file=str(video_path),
             output_dir=str(out_dir),
             segments=meta.get("segments"),
             detected_language=meta.get("language"),
@@ -120,4 +151,3 @@ def delete_job_files(job_id: str) -> None:
         Path(job["input_file"]).unlink(missing_ok=True)
     shutil.rmtree(OUTPUTS_DIR / job_id, ignore_errors=True)
     job_path(job_id).unlink(missing_ok=True)
-
