@@ -1,0 +1,6 @@
+demucs
+faster-whisper
+fastapi
+python-multipart
+torch
+uvicorn

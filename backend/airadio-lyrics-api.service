@@ -1,0 +1,14 @@
+[Unit]
+Description=AIRadio Lyrics Extractor FastAPI
+After=network.target
+
+[Service]
+Type=simple
+User=kojima
+WorkingDirectory=/home/kojima/exdirect/airadio-scripted-mv/backend
+ExecStart=/home/kojima/.local/bin/uvicorn main:app --host 0.0.0.0 --port 18201
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

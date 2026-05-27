@@ -1,2 +1,13 @@
 config.json
+config.yaml
+x_api_keys.sh
 index.html
+__pycache__/
+*.pyc
+storage/lyrics/uploads/*
+storage/lyrics/outputs/*
+storage/lyrics/work/*
+storage/lyrics/jobs/*
+storage/lyrics/*.log
+!storage/lyrics/uploads/.gitkeep
+!storage/lyrics/outputs/.gitkeep
