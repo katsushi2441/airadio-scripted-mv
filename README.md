@@ -48,7 +48,7 @@ deploy/          Deployment helpers
 
 ## Lyrics MV Generator
 
-`public/lyrics-extractor.php` provides a browser upload flow for music files.
+`public/scripted-mv.php` provides a browser upload flow for music files.
 The web page posts the audio to the FastAPI backend on the RTX server,
 queues the job, and then shows progress until `vocals.wav`, `lyrics.srt`,
 `lyrics.lrc`, `lyrics.txt`, and `lyrics_mv.mp4` are ready.

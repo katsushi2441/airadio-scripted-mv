@@ -4,7 +4,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth_common.php';
 date_default_timezone_set('Asia/Tokyo');
 
-$THIS_FILE = 'lyrics-extractor.php';
+$THIS_FILE = 'scripted-mv.php';
 $API = rtrim(AIRADIO_LYRICS_API, '/');
 $auth = url2ai_auth_bootstrap();
 $logged_in = $auth['logged_in'];

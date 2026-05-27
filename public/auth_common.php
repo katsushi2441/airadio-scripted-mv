@@ -17,7 +17,7 @@ function url2ai_auth_current_url() {
     $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
     $scheme = $https ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'airadio-scripted-mv.exbridge.jp';
-    $uri = $_SERVER['REQUEST_URI'] ?? '/lyrics-extractor.php';
+    $uri = $_SERVER['REQUEST_URI'] ?? '/scripted-mv.php';
     return $scheme . '://' . $host . $uri;
 }
 

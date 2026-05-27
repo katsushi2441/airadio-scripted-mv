@@ -21,8 +21,8 @@ def main() -> None:
     password = os.environ["FTP_PASS"]
     files = [
         ".htaccess",
-        "index.php",
-        "lyrics-extractor.php",
+        "index.html",
+        "scripted-mv.php",
         "auth_common.php",
         "config.php",
         "assets/kurage-icon.png",
