@@ -9,7 +9,7 @@ from config import OLLAMA_MODEL, OLLAMA_URL
 
 
 SYSTEM_PROMPT = """You are a Japanese music video visual director.
-Create exactly 12 visual scenes for a vertical lyric music video.
+Create visual scenes for a vertical lyric music video.
 
 Return ONLY JSON. No markdown.
 
@@ -17,7 +17,7 @@ Required format:
 {"title":"MV title in Japanese under 30 chars","mood":"overall mood","scenes":[{"index":0,"visual":"日本語の映像意図","image_prompt":"English vertical 9:16 cinematic music video background, no text, no subtitles","duration":5}]}
 
 Rules:
-- Exactly 12 scenes.
+- Create exactly {scene_count} scenes.
 - image_prompt must be English.
 - Do not include text, lyrics, captions, subtitles, letters, logos, or watermarks in images.
 - Use the lyrics only to infer mood, story, colors, locations, and emotional progression.
@@ -46,8 +46,9 @@ def parse_json_from_response(text: str) -> dict:
     raise ValueError(f"Could not parse JSON: {text[:300]}")
 
 
-def generate_mv_script(lyrics_text: str, filename: str = "") -> dict:
-    prompt = f"""{SYSTEM_PROMPT}
+def generate_mv_script(lyrics_text: str, filename: str = "", scene_count: int = 12) -> dict:
+    system_prompt = SYSTEM_PROMPT.format(scene_count=scene_count)
+    prompt = f"""{system_prompt}
 
 Song file: {filename}
 
@@ -67,8 +68,8 @@ Create visual direction JSON only."""
     response_text = resp.json().get("response") or ""
     script = parse_json_from_response(response_text)
     scenes = script.get("scenes") or []
-    if len(scenes) != 12:
-        raise ValueError(f"Script must have 12 scenes, got {len(scenes)}")
+    if len(scenes) != scene_count:
+        raise ValueError(f"Script must have {scene_count} scenes, got {len(scenes)}")
     for i, scene in enumerate(scenes):
         scene["index"] = i
         scene.setdefault("duration", 5)

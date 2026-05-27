@@ -106,6 +106,11 @@ if ($proxy !== '') {
         echo $body ?: json_encode(array('ok'=>false, 'error'=>$err ?: 'rerender failed'), JSON_UNESCAPED_UNICODE);
         exit;
     }
+    if ($proxy === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['job_id'])) {
+        $jid = preg_replace('/[^a-zA-Z0-9]/', '', $_GET['job_id']);
+        echo json_encode(api_json('DELETE', '/job/' . $jid, null, 20), JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     if ($proxy === 'jobs') {
         echo json_encode(api_json('GET', '/jobs?limit=20', null, 15), JSON_UNESCAPED_UNICODE);
         exit;
@@ -169,6 +174,7 @@ label{display:block;font-size:.75rem;color:var(--muted);font-weight:800;margin-b
 input,select,button{font:inherit}input[type=file],input[type=text],select{width:100%;border:1px solid var(--border2);border-radius:8px;padding:.62rem .8rem;background:#fff;color:var(--text)}
 textarea{width:100%;min-height:240px;border:1px solid var(--border2);border-radius:8px;padding:.75rem;background:#fff;color:var(--text);font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .btn{border:0;background:var(--accent);color:#fff;font-weight:900;border-radius:8px;padding:.68rem 1.2rem;cursor:pointer;white-space:nowrap}.btn:hover{background:#006578}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-danger{background:#b2473f}.btn-danger:hover{background:#94362f}.btn-mini{padding:.35rem .55rem;border-radius:6px;font-size:.72rem}
 .hint{font-size:.78rem;color:var(--muted);line-height:1.7;margin-top:.65rem}.progress{height:7px;background:var(--border);border-radius:99px;overflow:hidden;margin:.8rem 0}.fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:.3s}
 .badge{display:inline-flex;border-radius:5px;padding:.22rem .6rem;font-size:.72rem;font-weight:900}.badge-done{background:#e6f4e0;color:var(--green)}.badge-error{background:#fbeaea;color:var(--red)}.badge-queued,.badge-separating,.badge-transcribing{background:#e0f2f7;color:var(--accent)}
 #status-box{display:none}.links a{display:inline-block;margin:.25rem .35rem .25rem 0;background:var(--accent);color:#fff;text-decoration:none;border-radius:8px;padding:.55rem .75rem;font-weight:900;font-size:.82rem}
@@ -200,7 +206,7 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
 <?php elseif (!$is_admin): ?>
   <section class="card"><div class="card-body">管理者アカウント <strong>xb_bittensor</strong> でログインしてください。</div></section>
 <?php else: ?>
-  <section class="hero"><h1>Kurageプロジェクト AIRadio Scripted-MV</h1><p>MP3をアップロードすると、歌詞抽出、脚本生成、画像12枚生成、HyperFrames動画生成まで非同期で実行します。</p></section>
+  <section class="hero"><h1>Kurageプロジェクト AIRadio Scripted-MV</h1><p>MP3をアップロードすると、歌詞抽出、脚本生成、曲の長さに応じた画像生成、HyperFrames動画生成まで非同期で実行します。</p></section>
   <section class="card">
     <div class="card-head"><span class="dot"></span> Upload</div>
     <div class="card-body">
@@ -229,7 +235,6 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
         <textarea id="lrc-text"></textarea>
         <div class="editor-actions">
           <button id="btn-rerender" class="btn" type="button" onclick="rerenderCurrent()">修正してMP4再生成</button>
-          <span class="hint">タイムスタンプは残して、歌詞部分を修正してください。</span>
         </div>
       </div>
       <div id="error" style="display:none;color:var(--red);margin-top:.7rem"></div>
@@ -242,10 +247,11 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
     <div class="card-head"><span class="dot"></span> Recent Jobs</div>
     <div class="card-body"><div class="jobs">
       <?php foreach ($recent_jobs as $job): ?>
-      <div class="job" onclick="loadJob('<?= h($job['job_id']) ?>')">
+      <div class="job" data-job-id="<?= h($job['job_id']) ?>" onclick="loadJob('<?= h($job['job_id']) ?>')">
         <span class="badge badge-<?= h($job['status'] ?: 'queued') ?>"><?= h($job['status'] ?: '?') ?></span>
         <span class="job-title"><?= h($job['filename'] ?: $job['job_id']) ?></span>
         <span class="meta"><?= h(substr($job['created_at'] ?: '', 5, 11)) ?></span>
+        <button class="btn btn-danger btn-mini" type="button" onclick="deleteJob(event,'<?= h($job['job_id']) ?>')">削除</button>
       </div>
       <?php endforeach; ?>
     </div></div>
@@ -284,6 +290,9 @@ function updateUI(d){
   document.getElementById('filename').textContent=d.filename||d.job_id;
   document.getElementById('fill').style.width=(d.progress||0)+'%';
   document.getElementById('message').textContent=d.message||status;
+  if(d.scene_count&&d.duration_sec){
+    document.getElementById('message').textContent=(d.message||status)+' / '+Math.round(d.duration_sec)+'秒・画像'+d.scene_count+'枚';
+  }
   var log=document.getElementById('log');
   if(d.log){log.style.display='block';log.textContent=d.log}else{log.style.display='none'}
   var err=document.getElementById('error');
@@ -316,6 +325,20 @@ function rerenderCurrent(){
       btn.disabled=false;
       if(d.ok){startPoll(currentJobId)}else{alert('再生成失敗: '+(d.error||JSON.stringify(d)))}
     }).catch(function(e){btn.disabled=false;alert(e.message)});
+}
+function deleteJob(ev,jobId){
+  ev.stopPropagation();
+  if(!confirm('このジョブを削除しますか？')) return;
+  fetch(PROXY+'?proxy=delete&job_id='+encodeURIComponent(jobId),{method:'POST'})
+    .then(r=>r.json()).then(function(d){
+      if(d.ok){
+        var row=document.querySelector('[data-job-id="'+jobId+'"]');
+        if(row) row.remove();
+        if(currentJobId===jobId){currentJobId=null;document.getElementById('status-box').style.display='none';}
+      }else{
+        alert('削除失敗: '+(d.error||JSON.stringify(d)));
+      }
+    }).catch(function(e){alert(e.message)});
 }
 </script>
 </body>

@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from config import DEFAULT_LANGUAGE, DEFAULT_MODEL, JOBS_DIR, OUTPUTS_DIR, PORT, UPLOADS_DIR
-from pipeline import load_job, run_lyrics_pipeline, run_rerender_pipeline, update_job
+from pipeline import delete_job_files, load_job, run_lyrics_pipeline, run_rerender_pipeline, update_job
 
 app = FastAPI(title="AIRadio Lyrics Extractor API", version="1.0.0")
 
@@ -81,6 +81,8 @@ def status(job_id: str):
         "language": job.get("language", ""),
         "detected_language": job.get("detected_language"),
         "segments": job.get("segments"),
+        "duration_sec": job.get("duration_sec"),
+        "scene_count": job.get("scene_count"),
         "created_at": job.get("created_at"),
         "updated_at": job.get("updated_at"),
         "error": job.get("error"),
@@ -107,6 +109,14 @@ def rerender(job_id: str, lrc: str = Form(...)):
     update_job(job_id, status="rendering", progress=82, message="再生成キューに登録しました")
     thread = threading.Thread(target=run_rerender_pipeline, args=(job_id, lrc), daemon=True)
     thread.start()
+    return {"ok": True, "job_id": job_id}
+
+
+@app.delete("/job/{job_id}")
+def delete_job(job_id: str):
+    if load_job(job_id) is None:
+        raise HTTPException(status_code=404, detail="job not found")
+    delete_job_files(job_id)
     return {"ok": True, "job_id": job_id}
 
 

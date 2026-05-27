@@ -6,12 +6,13 @@ import subprocess
 import sys
 import time
 import traceback
+import math
 from pathlib import Path
 
 from config import BASE_DIR, JOBS_DIR, OUTPUTS_DIR, WORK_DIR
 from image_gen import generate_scene_images
 from script_gen import generate_mv_script
-from video_gen import generate_mv_video
+from video_gen import audio_duration, generate_mv_video
 
 
 def job_path(job_id: str) -> Path:
@@ -111,11 +112,13 @@ def run_lyrics_pipeline(job_id: str) -> None:
             detected_language=meta.get("language"),
             log="\n".join(log_lines[-120:]),
         )
-        mv_script = generate_mv_script(lyrics_text, job.get("filename") or audio.name)
-        update_job(job_id, script=mv_script, title=mv_script.get("title"))
+        duration_sec = audio_duration(audio)
+        scene_count = max(1, math.ceil(duration_sec / 10.0))
+        mv_script = generate_mv_script(lyrics_text, job.get("filename") or audio.name, scene_count=scene_count)
+        update_job(job_id, script=mv_script, title=mv_script.get("title"), duration_sec=duration_sec, scene_count=scene_count)
 
         job_dir = JOBS_DIR / job_id
-        update_job(job_id, status="imaging", progress=55, message="MV用画像を12枚生成中")
+        update_job(job_id, status="imaging", progress=55, message=f"MV用画像を{scene_count}枚生成中")
         image_paths = generate_scene_images(mv_script.get("scenes") or [], job_dir)
         update_job(job_id, image_count=len(image_paths), progress=78)
 
