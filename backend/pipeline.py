@@ -151,3 +151,45 @@ def delete_job_files(job_id: str) -> None:
         Path(job["input_file"]).unlink(missing_ok=True)
     shutil.rmtree(OUTPUTS_DIR / job_id, ignore_errors=True)
     job_path(job_id).unlink(missing_ok=True)
+
+
+def run_rerender_pipeline(job_id: str, corrected_lrc: str) -> None:
+    job = load_job(job_id)
+    if not job:
+        return
+    try:
+        audio = Path(job["input_file"])
+        out_dir = OUTPUTS_DIR / job_id
+        lrc_path = out_dir / "lyrics.lrc"
+        lrc_path.write_text(corrected_lrc.strip() + "\n", encoding="utf-8")
+
+        script = job.get("script")
+        if not script:
+            raise RuntimeError("MV脚本がありません。最初から生成してください。")
+
+        job_dir = JOBS_DIR / job_id
+        image_paths = []
+        for i in range(len(script.get("scenes") or [])):
+            path = job_dir / "assets" / f"scene_{i:02d}.png"
+            if not path.is_file():
+                raise RuntimeError(f"画像が見つかりません: {path.name}")
+            image_paths.append(path)
+
+        update_job(job_id, status="rendering", progress=85, message="修正した歌詞でMP4を再生成中")
+        video_path = generate_mv_video(script, image_paths, audio, lrc_path, job_dir)
+        update_job(
+            job_id,
+            status="done",
+            progress=100,
+            message="修正歌詞でMP4再生成完了",
+            video_file=str(video_path),
+        )
+    except Exception as exc:
+        update_job(
+            job_id,
+            status="error",
+            progress=100,
+            message="MP4再生成に失敗しました",
+            error=str(exc),
+            traceback=traceback.format_exc(),
+        )

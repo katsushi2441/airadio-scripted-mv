@@ -91,6 +91,21 @@ if ($proxy !== '') {
         echo json_encode(api_json('GET', '/status/' . $jid, null, 15), JSON_UNESCAPED_UNICODE);
         exit;
     }
+    if ($proxy === 'rerender' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['job_id'])) {
+        $jid = preg_replace('/[^a-zA-Z0-9]/', '', $_GET['job_id']);
+        $lrc = (string)($_POST['lrc'] ?? '');
+        $ch = curl_init($API . '/rerender/' . rawurlencode($jid));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, array('lrc' => $lrc));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+        $body = curl_exec($ch);
+        $err = curl_error($ch);
+        curl_close($ch);
+        echo $body ?: json_encode(array('ok'=>false, 'error'=>$err ?: 'rerender failed'), JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     if ($proxy === 'jobs') {
         echo json_encode(api_json('GET', '/jobs?limit=20', null, 15), JSON_UNESCAPED_UNICODE);
         exit;
@@ -152,10 +167,13 @@ header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.96);border-
 .card-body{padding:1.2rem}.grid{display:grid;grid-template-columns:1fr 130px 110px auto;gap:.65rem;align-items:end}
 label{display:block;font-size:.75rem;color:var(--muted);font-weight:800;margin-bottom:.35rem}
 input,select,button{font:inherit}input[type=file],input[type=text],select{width:100%;border:1px solid var(--border2);border-radius:8px;padding:.62rem .8rem;background:#fff;color:var(--text)}
+textarea{width:100%;min-height:240px;border:1px solid var(--border2);border-radius:8px;padding:.75rem;background:#fff;color:var(--text);font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .btn{border:0;background:var(--accent);color:#fff;font-weight:900;border-radius:8px;padding:.68rem 1.2rem;cursor:pointer;white-space:nowrap}.btn:hover{background:#006578}.btn:disabled{opacity:.5;cursor:not-allowed}
 .hint{font-size:.78rem;color:var(--muted);line-height:1.7;margin-top:.65rem}.progress{height:7px;background:var(--border);border-radius:99px;overflow:hidden;margin:.8rem 0}.fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:.3s}
 .badge{display:inline-flex;border-radius:5px;padding:.22rem .6rem;font-size:.72rem;font-weight:900}.badge-done{background:#e6f4e0;color:var(--green)}.badge-error{background:#fbeaea;color:var(--red)}.badge-queued,.badge-separating,.badge-transcribing{background:#e0f2f7;color:var(--accent)}
 #status-box{display:none}.links a{display:inline-block;margin:.25rem .35rem .25rem 0;background:var(--accent);color:#fff;text-decoration:none;border-radius:8px;padding:.55rem .75rem;font-weight:900;font-size:.82rem}
+.video-wrap{display:none;margin-top:1rem;text-align:center}.video-wrap video{width:100%;max-width:360px;border-radius:12px;border:1px solid var(--border);box-shadow:0 6px 22px rgba(19,35,41,.16);background:#000}
+.editor{display:none;margin-top:1rem}.editor-actions{display:flex;gap:.6rem;align-items:center;margin-top:.6rem;flex-wrap:wrap}
 pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color:#cfe1ff;border-radius:8px;padding:.9rem;font-size:.78rem}
 .jobs{display:grid;gap:.5rem}.job{display:flex;align-items:center;gap:.7rem;padding:.65rem .8rem;border:1px solid var(--border);border-radius:8px;background:#f8fbfb;cursor:pointer}.job:hover{border-color:var(--accent)}.job-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.meta{color:var(--muted);font-size:.75rem}
 @media(max-width:760px){.grid{grid-template-columns:1fr}.container{padding:1rem}header{padding:.8rem 1rem;align-items:flex-start;gap:.6rem;flex-direction:column}}
@@ -205,6 +223,15 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
       <div class="progress"><div id="fill" class="fill"></div></div>
       <div id="message" class="hint">待機中...</div>
       <div id="result-links" class="links" style="display:none"></div>
+      <div id="video-wrap" class="video-wrap"><video id="video-player" controls playsinline></video></div>
+      <div id="lrc-editor" class="editor">
+        <label>歌詞修正（LRC）</label>
+        <textarea id="lrc-text"></textarea>
+        <div class="editor-actions">
+          <button id="btn-rerender" class="btn" type="button" onclick="rerenderCurrent()">修正してMP4再生成</button>
+          <span class="hint">タイムスタンプは残して、歌詞部分を修正してください。</span>
+        </div>
+      </div>
       <div id="error" style="display:none;color:var(--red);margin-top:.7rem"></div>
       <pre id="log" style="display:none"></pre>
     </div>
@@ -229,9 +256,10 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
 <script>
 var PROXY = '<?= h($THIS_FILE) ?>';
 var timer = null;
+var currentJobId = null;
 function startPoll(jobId){ if(timer) clearInterval(timer); poll(jobId); timer=setInterval(function(){poll(jobId)},2500); }
 function stopPoll(){ if(timer){clearInterval(timer); timer=null;} }
-function loadJob(jobId){ document.getElementById('status-box').style.display='block'; startPoll(jobId); }
+function loadJob(jobId){ currentJobId=jobId; document.getElementById('status-box').style.display='block'; startPoll(jobId); }
 var form=document.getElementById('upload-form');
 if(form){
   form.addEventListener('submit',function(e){
@@ -240,7 +268,7 @@ if(form){
     fetch(PROXY+'?proxy=extract',{method:'POST',body:new FormData(form)})
       .then(r=>r.json()).then(function(d){
         btn.disabled=false;
-        if(d.ok&&d.job_id){ document.getElementById('status-box').style.display='block'; startPoll(d.job_id); }
+        if(d.ok&&d.job_id){ currentJobId=d.job_id; document.getElementById('status-box').style.display='block'; startPoll(d.job_id); }
         else alert('登録失敗: '+(d.error||JSON.stringify(d)));
       }).catch(function(err){btn.disabled=false;alert(err.message)});
   });
@@ -261,11 +289,33 @@ function updateUI(d){
   var err=document.getElementById('error');
   if(status==='error'){stopPoll();err.style.display='block';err.textContent=d.error||'error';}
   var links=document.getElementById('result-links');
+  var videoWrap=document.getElementById('video-wrap');
+  var editor=document.getElementById('lrc-editor');
   if(status==='done'){
     stopPoll(); err.style.display='none'; links.style.display='block';
     var files=['lyrics_mv.mp4','vocals.wav','lyrics.srt','lyrics.lrc','lyrics.txt','metadata.json'];
     links.innerHTML=files.map(function(f){return '<a href="'+PROXY+'?job_id='+encodeURIComponent(d.job_id)+'&file='+encodeURIComponent(f)+'">'+f+'</a>'}).join('');
-  } else { links.style.display='none'; }
+    var videoUrl=PROXY+'?job_id='+encodeURIComponent(d.job_id)+'&file=lyrics_mv.mp4&t='+(new Date().getTime());
+    document.getElementById('video-player').src=videoUrl;
+    videoWrap.style.display='block';
+    document.getElementById('lrc-text').value=d.lrc||'';
+    editor.style.display='block';
+  } else {
+    links.style.display='none';
+    videoWrap.style.display='none';
+  }
+}
+function rerenderCurrent(){
+  if(!currentJobId){alert('ジョブを選択してください');return}
+  var btn=document.getElementById('btn-rerender');
+  btn.disabled=true;
+  var fd=new FormData();
+  fd.append('lrc',document.getElementById('lrc-text').value);
+  fetch(PROXY+'?proxy=rerender&job_id='+encodeURIComponent(currentJobId),{method:'POST',body:fd})
+    .then(r=>r.json()).then(function(d){
+      btn.disabled=false;
+      if(d.ok){startPoll(currentJobId)}else{alert('再生成失敗: '+(d.error||JSON.stringify(d)))}
+    }).catch(function(e){btn.disabled=false;alert(e.message)});
 }
 </script>
 </body>

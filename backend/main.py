@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from config import DEFAULT_LANGUAGE, DEFAULT_MODEL, JOBS_DIR, OUTPUTS_DIR, PORT, UPLOADS_DIR
-from pipeline import load_job, run_lyrics_pipeline, update_job
+from pipeline import load_job, run_lyrics_pipeline, run_rerender_pipeline, update_job
 
 app = FastAPI(title="AIRadio Lyrics Extractor API", version="1.0.0")
 
@@ -85,6 +85,7 @@ def status(job_id: str):
         "updated_at": job.get("updated_at"),
         "error": job.get("error"),
         "log": job.get("log", ""),
+        "lrc": (OUTPUTS_DIR / job_id / "lyrics.lrc").read_text(encoding="utf-8") if (OUTPUTS_DIR / job_id / "lyrics.lrc").is_file() else "",
         "files": {
             "video": f"/file/{job_id}/lyrics_mv.mp4",
             "vocals": f"/file/{job_id}/vocals.wav",
@@ -94,6 +95,19 @@ def status(job_id: str):
             "metadata": f"/file/{job_id}/metadata.json",
         } if job.get("status") == "done" else {},
     }
+
+
+@app.post("/rerender/{job_id}")
+def rerender(job_id: str, lrc: str = Form(...)):
+    job = load_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="job not found")
+    if not lrc.strip():
+        raise HTTPException(status_code=400, detail="lrc is required")
+    update_job(job_id, status="rendering", progress=82, message="再生成キューに登録しました")
+    thread = threading.Thread(target=run_rerender_pipeline, args=(job_id, lrc), daemon=True)
+    thread.start()
+    return {"ok": True, "job_id": job_id}
 
 
 @app.get("/jobs")
