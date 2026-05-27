@@ -25,10 +25,20 @@ def main() -> None:
         "lyrics-extractor.php",
         "auth_common.php",
         "config.php",
+        "assets/kurage-icon.png",
     ]
     with ftplib.FTP(host, timeout=60) as ftp:
         ftp.login(user, password)
         for name in files:
+            if "/" in name:
+                parts = name.split("/")[:-1]
+                path = REMOTE_ROOT
+                for part in parts:
+                    path += "/" + part
+                    try:
+                        ftp.mkd(path)
+                    except Exception:
+                        pass
             upload_file(ftp, PUBLIC / name, REMOTE_ROOT + "/" + name)
 
 

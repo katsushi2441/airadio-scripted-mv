@@ -5,7 +5,7 @@
 
 This repository provides AIRadio-related web tools.
 
-The current main product is **Lyrics Subtitled Music Video Generator**:
+The current main product is **Kurageプロジェクト AIRadio Scripted-MV**:
 
 - Upload a music file from the web UI
 - Queue the analysis on the RTX/FastAPI server

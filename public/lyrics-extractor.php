@@ -136,12 +136,13 @@ if ($is_admin) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AIRadio Lyrics Extractor</title>
+<title>Kurageプロジェクト AIRadio Scripted-MV</title>
 <style>
 :root{--bg:#f4f7f7;--surface:#fff;--border:#dbe5e8;--border2:#c4d4d8;--accent:#007f96;--accent2:#35b99b;--text:#132329;--muted:#5a6a72;--red:#b2473f;--green:#2f8f46}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;font-size:14px}
 header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.96);border-bottom:1px solid var(--border);padding:.85rem 1.4rem;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(19,35,41,.06)}
-.logo{font-weight:900;font-size:1.1rem;text-decoration:none;color:var(--text)}.logo span{color:var(--accent)}.sub{font-size:.72rem;color:var(--muted);margin-left:.4rem}
+.brand{display:flex;align-items:center;gap:.65rem}.brand-icon{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 2px 8px rgba(0,127,150,.18)}
+.logo{font-weight:900;font-size:1.08rem;text-decoration:none;color:var(--text);display:block;line-height:1.15}.logo span{color:var(--accent)}.sub{display:block;font-size:.72rem;color:var(--muted);margin-top:.18rem}
 .userbar{display:flex;gap:.7rem;align-items:center;color:var(--muted);font-size:.82rem}.userbar strong{color:var(--green)}
 .btn-sm{border:1px solid var(--border2);color:var(--muted);padding:.25rem .7rem;border-radius:6px;text-decoration:none;background:#fff}
 .api{font-size:.72rem;border-radius:5px;padding:.22rem .55rem;font-weight:800}.api-ok{background:#e6f4e0;color:var(--green)}.api-ng{background:#fbeaea;color:var(--red)}
@@ -162,7 +163,13 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
 </head>
 <body>
 <header>
-    <div><a class="logo" href="<?= h($THIS_FILE) ?>"><span>AIRadio</span> Lyrics MV</a><span class="sub">Demucs + Whisper + HyperFrames</span></div>
+  <div class="brand">
+    <img class="brand-icon" src="assets/kurage-icon.png" alt="Kurage">
+    <div>
+      <a class="logo" href="<?= h($THIS_FILE) ?>"><span>Kurageプロジェクト</span><br>AIRadio Scripted-MV</a>
+      <span class="sub">Demucs + Whisper + HyperFrames</span>
+    </div>
+  </div>
   <div class="userbar">
     <span class="api <?= $api_ok ? 'api-ok' : 'api-ng' ?>"><?= $api_ok ? 'API ●' : 'API ×' ?></span>
     <?php if ($logged_in): ?><span>@<strong><?= h($session_user) ?></strong></span><a class="btn-sm" href="?logout=1">logout</a><?php else: ?><a class="btn-sm" href="?login=1">Xでログイン</a><?php endif; ?>
@@ -170,12 +177,12 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
 </header>
 <main class="container">
 <?php if (!$logged_in): ?>
-  <section class="hero"><h1>曲ファイルから歌詞字幕付きMVを生成</h1><p>管理者ログイン後、MP3をアップロードして生成できます。</p></section>
+  <section class="hero"><h1>Kurageプロジェクト AIRadio Scripted-MV</h1><p>管理者ログイン後、MP3をアップロードして生成できます。</p></section>
   <section class="card"><div class="card-body" style="text-align:center"><a class="btn" href="?login=1">Xでログイン</a></div></section>
 <?php elseif (!$is_admin): ?>
   <section class="card"><div class="card-body">管理者アカウント <strong>xb_bittensor</strong> でログインしてください。</div></section>
 <?php else: ?>
-  <section class="hero"><h1>歌詞字幕付きミュージックビデオ生成</h1><p>MP3をアップロードすると、歌詞抽出、脚本生成、画像12枚生成、HyperFrames動画生成まで非同期で実行します。</p></section>
+  <section class="hero"><h1>Kurageプロジェクト AIRadio Scripted-MV</h1><p>MP3をアップロードすると、歌詞抽出、脚本生成、画像12枚生成、HyperFrames動画生成まで非同期で実行します。</p></section>
   <section class="card">
     <div class="card-head"><span class="dot"></span> Upload</div>
     <div class="card-body">
