@@ -14,6 +14,7 @@ The current main product is **Kurageプロジェクト AIRadio Scripted-MV**:
 - Generate a visual script from lyrics
 - Generate images at roughly one image per 10 seconds
 - Render a lyric-subtitled music video with HyperFrames
+- Publish finished videos, lyrics, and metadata to the web server
 
 Each component can be used independently, but together they form a complete
 AI media pipeline.
@@ -52,6 +53,13 @@ deploy/          Deployment helpers
 The web page posts the audio to the FastAPI backend on the RTX server,
 queues the job, and then shows progress until `vocals.wav`, `lyrics.srt`,
 `lyrics.lrc`, `lyrics.txt`, and `lyrics_mv.mp4` are ready.
+
+`public/scripted-mvv.php` is the public viewer. It reads only web-server files:
+
+- `videos/{job_id}/lyrics_mv.mp4`
+- `videos/{job_id}/lyrics.lrc`
+- `videos/{job_id}/lyrics.txt`
+- `data/scripted_mv_videos.json`
 
 CLI usage is documented in:
 

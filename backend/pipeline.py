@@ -11,6 +11,7 @@ from pathlib import Path
 
 from config import BASE_DIR, JOBS_DIR, OUTPUTS_DIR, WORK_DIR
 from image_gen import generate_scene_images
+from publish_web import publish_job
 from script_gen import generate_mv_script
 from video_gen import audio_duration, generate_mv_video
 
@@ -136,6 +137,10 @@ def run_lyrics_pipeline(job_id: str) -> None:
             detected_language=meta.get("language"),
             log="\n".join(log_lines[-120:]),
         )
+        try:
+            publish_job(job_id)
+        except Exception as pub_exc:
+            update_job(job_id, publish_error=str(pub_exc))
     except Exception as exc:
         update_job(
             job_id,
@@ -175,6 +180,10 @@ def run_mv_from_existing_lyrics(job_id: str) -> None:
         update_job(job_id, status="rendering", progress=85, message="HyperFramesで歌詞字幕付きMVを生成中")
         video_path = generate_mv_video(mv_script, image_paths, audio, lrc_path, job_dir)
         update_job(job_id, status="done", progress=100, message="歌詞字幕付きMV生成完了", video_file=str(video_path), output_dir=str(out_dir))
+        try:
+            publish_job(job_id)
+        except Exception as pub_exc:
+            update_job(job_id, publish_error=str(pub_exc))
     except Exception as exc:
         update_job(job_id, status="error", progress=100, message="MV生成に失敗しました", error=str(exc), traceback=traceback.format_exc())
 
@@ -218,6 +227,10 @@ def run_rerender_pipeline(job_id: str, corrected_lrc: str) -> None:
             message="修正歌詞でMP4再生成完了",
             video_file=str(video_path),
         )
+        try:
+            publish_job(job_id)
+        except Exception as pub_exc:
+            update_job(job_id, publish_error=str(pub_exc))
     except Exception as exc:
         update_job(
             job_id,

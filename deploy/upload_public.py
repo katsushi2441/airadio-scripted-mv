@@ -23,6 +23,7 @@ def main() -> None:
         ".htaccess",
         "index.html",
         "scripted-mv.php",
+        "scripted-mvv.php",
         "auth_common.php",
         "config.php",
         "assets/kurage-icon.png",
