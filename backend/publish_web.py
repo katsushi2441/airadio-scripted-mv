@@ -52,6 +52,16 @@ def load_public_db() -> list[dict]:
         return []
 
 
+def load_remote_public_db(ftp: ftplib.FTP) -> list[dict]:
+    chunks: list[bytes] = []
+    try:
+        ftp.retrbinary(f"RETR {REMOTE_ROOT}/data/scripted_mv_videos.json", chunks.append)
+        data = json.loads(b"".join(chunks).decode("utf-8"))
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
 def save_public_db(items: list[dict]) -> None:
     LOCAL_PUBLIC_DB.parent.mkdir(parents=True, exist_ok=True)
     LOCAL_PUBLIC_DB.write_text(json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -81,6 +91,9 @@ def publish_job(job_id: str) -> None:
             if path.is_file():
                 upload(ftp, path, f"{remote_dir}/{name}")
 
+        existing_items = load_remote_public_db(ftp) or load_public_db()
+        existing_by_id = {x.get("job_id"): x for x in existing_items if x.get("job_id")}
+        previous = existing_by_id.get(job_id, {})
         item = {
             "job_id": job_id,
             "title": job.get("title") or Path(job.get("filename") or job_id).stem,
@@ -89,12 +102,13 @@ def publish_job(job_id: str) -> None:
             "updated_at": job.get("updated_at") or "",
             "duration_sec": job.get("duration_sec"),
             "scene_count": job.get("scene_count"),
+            "views": int(previous.get("views") or 9999),
             "video_url": f"{PUBLIC_BASE_URL}/videos/{job_id}/lyrics_mv.mp4",
             "lrc_url": f"{PUBLIC_BASE_URL}/videos/{job_id}/lyrics.lrc",
             "txt_url": f"{PUBLIC_BASE_URL}/videos/{job_id}/lyrics.txt",
             "detail_url": f"{PUBLIC_BASE_URL}/scripted-mvv.php?id={job_id}",
         }
-        items = [x for x in load_public_db() if x.get("job_id") != job_id]
+        items = [x for x in existing_items if x.get("job_id") != job_id]
         items.insert(0, item)
         items.sort(key=lambda x: x.get("updated_at") or x.get("created_at") or "", reverse=True)
         save_public_db(items)

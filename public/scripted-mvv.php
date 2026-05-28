@@ -15,11 +15,55 @@ function load_videos(string $path): array {
     return is_array($data) ? $data : array();
 }
 
+function save_videos(string $path, array $videos): void {
+    $dir = dirname($path);
+    if (!is_dir($dir)) { mkdir($dir, 0775, true); }
+    $tmp = $path . '.tmp';
+    file_put_contents($tmp, json_encode($videos, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), LOCK_EX);
+    rename($tmp, $path);
+}
+
+function video_url(array $v): string {
+    global $BASE_URL, $THIS_FILE;
+    return $BASE_URL . '/' . $THIS_FILE . '?id=' . urlencode((string)($v['job_id'] ?? ''));
+}
+
 $videos = load_videos($DATA_FILE);
+$changed = false;
+foreach ($videos as &$v) {
+    if (!isset($v['views']) || !is_numeric($v['views'])) {
+        $v['views'] = 9999;
+        $changed = true;
+    }
+}
+unset($v);
 $detail_id = isset($_GET['id']) ? preg_replace('/[^a-zA-Z0-9]/', '', (string)$_GET['id']) : '';
 $detail = null;
-foreach ($videos as $v) {
-    if (($v['job_id'] ?? '') === $detail_id) { $detail = $v; break; }
+foreach ($videos as $i => $v) {
+    if (($v['job_id'] ?? '') === $detail_id) {
+        $videos[$i]['views'] = (int)($videos[$i]['views'] ?? 9999) + 1;
+        $detail = $videos[$i];
+        $changed = true;
+        break;
+    }
+}
+if ($changed) {
+    save_videos($DATA_FILE, $videos);
+}
+
+$sort = isset($_GET['sort']) ? (string)$_GET['sort'] : 'created';
+if (!in_array($sort, array('created', 'views'), true)) { $sort = 'created'; }
+if (!$detail) {
+    usort($videos, function($a, $b) use ($sort) {
+        if ($sort === 'views') {
+            $av = (int)($a['views'] ?? 9999);
+            $bv = (int)($b['views'] ?? 9999);
+            if ($bv !== $av) { return $bv <=> $av; }
+        }
+        $ad = (string)($a['created_at'] ?? $a['updated_at'] ?? '');
+        $bd = (string)($b['created_at'] ?? $b['updated_at'] ?? '');
+        return strcmp($bd, $ad);
+    });
 }
 
 if ($detail) {
@@ -51,9 +95,9 @@ if ($detail) {
 .header{position:sticky;top:0;background:#fff;border-bottom:1px solid #e5edf0;z-index:10;padding:14px 18px;display:flex;align-items:center;gap:10px}
 .header img{width:38px;height:38px;border-radius:50%;object-fit:cover}.header h1{font-size:16px;margin:0;font-weight:900}.header a{text-decoration:none;color:inherit}
 .badge{background:#007f96;color:#fff;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800}.right{margin-left:auto;display:flex;gap:8px;align-items:center}.link,.reel-btn{border:1px solid #007f96;color:#007f96;border-radius:7px;padding:6px 10px;text-decoration:none;font-size:12px;font-weight:800;background:#fff;cursor:pointer;font-family:inherit}.reel-btn{background:#007f96;color:#fff}.link:hover{background:#e0f5f8}.reel-btn:hover{background:#006880}
-.container{max-width:720px;margin:0 auto;padding:0 0 80px}.count{padding:12px 18px;color:#6b7a82;border-bottom:1px solid #f0f3f4}
+.container{max-width:720px;margin:0 auto;padding:0 0 80px}.count{padding:12px 18px;color:#6b7a82;border-bottom:1px solid #f0f3f4;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}.sorts{display:flex;gap:6px}.sort{border:1px solid #d6e3e8;border-radius:999px;padding:5px 10px;color:#53636b;text-decoration:none;font-size:12px;font-weight:800}.sort.active{background:#007f96;border-color:#007f96;color:#fff}
 .card{display:flex;gap:14px;padding:18px;border-bottom:1px solid #f0f3f4}.thumb{width:96px;height:170px;border-radius:10px;background:#000;overflow:hidden;flex-shrink:0}.thumb video{width:100%;height:100%;object-fit:cover}
-.body{min-width:0;flex:1}.title{font-weight:900;font-size:16px;margin-bottom:6px}.meta{color:#7b8990;font-size:12px;margin-bottom:10px}.actions{display:flex;gap:7px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #d6e3e8;border-radius:8px;padding:7px 11px;text-decoration:none;color:#46545a;font-size:12px;font-weight:800}.btn.primary{background:#e0f5f8;border-color:#b7e0e8;color:#007f96}
+.body{min-width:0;flex:1}.title{font-weight:900;font-size:16px;margin-bottom:6px}.meta{color:#7b8990;font-size:12px;margin-bottom:10px}.views{display:inline-flex;align-items:center;gap:4px;color:#007f96;font-weight:900}.actions{display:flex;gap:7px;flex-wrap:wrap}.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #d6e3e8;border-radius:8px;padding:7px 11px;text-decoration:none;color:#46545a;font-size:12px;font-weight:800;background:#fff;cursor:pointer;font-family:inherit}.btn.primary{background:#e0f5f8;border-color:#b7e0e8;color:#007f96}.btn.x{background:#111827;border-color:#111827;color:#fff}
 .empty{text-align:center;color:#9aa6ab;padding:70px 20px}.detail{padding:18px}.video{max-width:390px;margin:0 auto 18px;background:#000;border-radius:14px;overflow:hidden}.video video{width:100%;display:block}.lyrics{white-space:pre-wrap;background:#f6fafb;border:1px solid #dce8ec;border-radius:10px;padding:14px;line-height:1.75;color:#34444b}
 .reel-overlay{display:none;position:fixed;inset:0;z-index:500;background:#000}.reel-overlay.open{display:flex;align-items:stretch;justify-content:center}.reel-close{position:fixed;top:14px;right:14px;z-index:600;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:20px;padding:7px 16px;font-size:13px;cursor:pointer}.reel-feed{width:100%;max-width:420px;height:100dvh;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}.reel-feed::-webkit-scrollbar{display:none}.reel-slide{position:relative;height:100dvh;scroll-snap-align:start;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}.reel-slide video{width:100%;height:100%;object-fit:contain;display:block}.reel-grad{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.2) 0%,transparent 30%,transparent 55%,rgba(0,0,0,.75) 100%);pointer-events:none}.reel-info{position:absolute;bottom:0;left:0;right:60px;padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 44px)}.reel-title{font-size:14px;font-weight:800;color:#fff;margin-bottom:4px;line-height:1.4}.reel-meta{font-size:12px;color:rgba(255,255,255,.65)}.reel-side{position:absolute;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 48px);display:flex;flex-direction:column;gap:12px;align-items:center}.reel-side-btn{background:rgba(0,0,0,.5);border:none;border-radius:50%;width:44px;height:44px;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;text-decoration:none}.reel-side-btn span{font-size:9px;color:rgba(255,255,255,.65)}
 @media(max-width:560px){.card{padding:14px}.thumb{width:82px;height:146px}.header{padding:12px}.header h1{font-size:14px}.badge{display:none}.link,.reel-btn{padding:5px 8px}}
@@ -76,9 +120,11 @@ if ($detail) {
   <div class="detail">
     <div class="video"><video src="<?= h($detail['video_url'] ?? '') ?>" controls playsinline preload="metadata"></video></div>
     <h2 class="title"><?= h($detail['title'] ?? '') ?></h2>
-    <div class="meta"><?= h($detail['filename'] ?? '') ?> / <?= h($detail['updated_at'] ?? '') ?><?php if (!empty($detail['scene_count'])): ?> / 画像<?= h($detail['scene_count']) ?>枚<?php endif; ?></div>
+    <div class="meta"><?= h($detail['filename'] ?? '') ?> / <?= h($detail['updated_at'] ?? '') ?> / <span class="views">表示<?= h((string)($detail['views'] ?? 9999)) ?></span><?php if (!empty($detail['scene_count'])): ?> / 画像<?= h($detail['scene_count']) ?>枚<?php endif; ?></div>
     <div class="actions">
       <a class="btn primary" href="<?= h($THIS_FILE) ?>">一覧</a>
+      <button class="btn" type="button" onclick="copyShare('<?= h(video_url($detail)) ?>')">コピー</button>
+      <a class="btn x" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=<?= rawurlencode(($detail['title'] ?? 'AIRadio Scripted-MV') . ' | ' . $SITE_NAME) ?>&url=<?= rawurlencode(video_url($detail)) ?>">X投稿</a>
     </div>
     <?php
       $lyrics = '';
@@ -92,7 +138,13 @@ if ($detail) {
 </main>
 <?php else: ?>
 <main class="container">
-  <div class="count"><?= count($videos) ?> videos</div>
+  <div class="count">
+    <span><?= count($videos) ?> videos</span>
+    <span class="sorts">
+      <a class="sort <?= $sort === 'created' ? 'active' : '' ?>" href="<?= h($THIS_FILE . '?sort=created') ?>">作成日順</a>
+      <a class="sort <?= $sort === 'views' ? 'active' : '' ?>" href="<?= h($THIS_FILE . '?sort=views') ?>">表示回数順</a>
+    </span>
+  </div>
   <?php if (!$videos): ?>
     <div class="empty">公開済み動画はまだありません。</div>
   <?php endif; ?>
@@ -103,9 +155,11 @@ if ($detail) {
       </a>
       <div class="body">
         <div class="title"><?= h($v['title'] ?? '') ?></div>
-        <div class="meta"><?= h($v['filename'] ?? '') ?><br><?= h($v['updated_at'] ?? $v['created_at'] ?? '') ?><?php if (!empty($v['duration_sec'])): ?> / <?= h((string)round((float)$v['duration_sec'])) ?>秒<?php endif; ?><?php if (!empty($v['scene_count'])): ?> / 画像<?= h($v['scene_count']) ?>枚<?php endif; ?></div>
+        <div class="meta"><?= h($v['filename'] ?? '') ?><br><?= h($v['updated_at'] ?? $v['created_at'] ?? '') ?> / <span class="views">表示<?= h((string)($v['views'] ?? 9999)) ?></span><?php if (!empty($v['duration_sec'])): ?> / <?= h((string)round((float)$v['duration_sec'])) ?>秒<?php endif; ?><?php if (!empty($v['scene_count'])): ?> / 画像<?= h($v['scene_count']) ?>枚<?php endif; ?></div>
         <div class="actions">
           <a class="btn primary" href="<?= h($THIS_FILE . '?id=' . urlencode($v['job_id'] ?? '')) ?>">再生</a>
+          <button class="btn" type="button" onclick="copyShare('<?= h(video_url($v)) ?>')">コピー</button>
+          <a class="btn x" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=<?= rawurlencode(($v['title'] ?? 'AIRadio Scripted-MV') . ' | ' . $SITE_NAME) ?>&url=<?= rawurlencode(video_url($v)) ?>">X投稿</a>
         </div>
       </div>
     </article>
@@ -150,6 +204,20 @@ function primeThumbVideos(root){
   });
 }
 primeThumbVideos(document);
+function copyShare(url){
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(url).then(function(){alert('URLをコピーしました');}).catch(function(){fallbackCopy(url);});
+  }else{
+    fallbackCopy(url);
+  }
+}
+function fallbackCopy(text){
+  var ta=document.createElement('textarea');
+  ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');alert('URLをコピーしました');}catch(e){prompt('コピーしてください',text);}
+  document.body.removeChild(ta);
+}
 var reelMuted=true,reelCurrent=0,reelSlides=[],reelObs=null,reelReady=false;
 function openReel(idx){
   var overlay=document.getElementById('reel-overlay');
