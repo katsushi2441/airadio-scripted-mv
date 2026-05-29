@@ -10,5 +10,8 @@ storage/lyrics/work/*
 storage/lyrics/jobs/*
 storage/lyrics/*.log
 storage/lyrics/public_videos.json
+storage/youtube/
+client_secret*.json
+token.json
 !storage/lyrics/uploads/.gitkeep
 !storage/lyrics/outputs/.gitkeep

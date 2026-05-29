@@ -65,6 +65,26 @@ CLI usage is documented in:
 
 - [tools/lyrics-extractor/README.md](tools/lyrics-extractor/README.md)
 
+## YouTube Upload
+
+YouTube投稿は、初回だけOAuth認証して `storage/youtube/token.json` を保存する。
+以後はrefresh tokenでアクセストークンを自動更新する。
+
+```bash
+cd /home/kojima/exdirect/airadio-scripted-mv
+python3 -m pip install -r tools/youtube/requirements.txt
+mkdir -p storage/youtube
+# Google CloudのOAuthクライアントJSONをここへ置く
+# storage/youtube/client_secret.json
+python3 tools/youtube/youtube_auth.py
+python3 tools/youtube/upload_youtube.py public/videos/JOB_ID/lyrics_mv.mp4 \
+  --title "動画タイトル" \
+  --description "説明文" \
+  --privacy unlisted
+```
+
+`storage/youtube/` と `client_secret*.json` はGit管理しない。
+
 FastAPI backend:
 
 ```bash
