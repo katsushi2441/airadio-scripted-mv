@@ -28,6 +28,7 @@ def main() -> None:
         "config.php",
         "assets/kurage-icon.png",
         "assets/kurage.png",
+        "assets/scripted-mv-ogp.png",
         "assets/scripted-mv-icon.png",
         "assets/scripted-mv-icon-512.png",
         "assets/scripted-mv-icon-256.png",

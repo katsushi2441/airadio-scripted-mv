@@ -118,7 +118,15 @@ if ($detail) {
 <meta property="og:title" content="<?= h($page_title) ?>">
 <meta property="og:description" content="<?= h($page_desc) ?>">
 <meta property="og:url" content="<?= h($page_url) ?>">
+<meta property="og:image" content="<?= h($BASE_URL) ?>/assets/scripted-mv-ogp.png">
+<meta property="og:image:width" content="1536">
+<meta property="og:image:height" content="1024">
+<meta property="og:image:alt" content="AIRadio Scripted-MV 歌詞字幕付きMV生成AIシステム">
 <?php if ($og_video): ?><meta property="og:video" content="<?= h($og_video) ?>"><?php endif; ?>
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<?= h($page_title) ?>">
+<meta name="twitter:description" content="<?= h($page_desc) ?>">
+<meta name="twitter:image" content="<?= h($BASE_URL) ?>/assets/scripted-mv-ogp.png">
 <style>
 *{box-sizing:border-box}body{margin:0;background:#fff;color:#132329;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;font-size:14px}
 .header{position:sticky;top:0;background:#fff;border-bottom:1px solid #e5edf0;z-index:10;padding:14px 18px;display:flex;align-items:center;gap:10px}

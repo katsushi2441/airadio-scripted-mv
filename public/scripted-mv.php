@@ -192,6 +192,20 @@ $api_ok = null;
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kurageプロジェクト AIRadio Scripted-MV</title>
+<meta name="description" content="MP3から歌詞を抽出し、AI脚本、画像生成、HyperFramesで歌詞字幕付きMVを生成するKurage派生プロジェクト。">
+<link rel="canonical" href="https://airadio-scripted-mv.exbridge.jp/scripted-mv.php">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kurageプロジェクト AIRadio Scripted-MV">
+<meta property="og:description" content="MP3から歌詞字幕付きミュージックビデオを生成するAIシステム。">
+<meta property="og:url" content="https://airadio-scripted-mv.exbridge.jp/scripted-mv.php">
+<meta property="og:image" content="https://airadio-scripted-mv.exbridge.jp/assets/scripted-mv-ogp.png">
+<meta property="og:image:width" content="1536">
+<meta property="og:image:height" content="1024">
+<meta property="og:image:alt" content="AIRadio Scripted-MV 歌詞字幕付きMV生成AIシステム">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Kurageプロジェクト AIRadio Scripted-MV">
+<meta name="twitter:description" content="MP3から歌詞字幕付きMVを生成するKurage派生プロジェクト。">
+<meta name="twitter:image" content="https://airadio-scripted-mv.exbridge.jp/assets/scripted-mv-ogp.png">
 <style>
 :root{--bg:#f4f7f7;--surface:#fff;--border:#dbe5e8;--border2:#c4d4d8;--accent:#007f96;--accent2:#35b99b;--text:#132329;--muted:#5a6a72;--red:#b2473f;--green:#2f8f46}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;font-size:14px}
