@@ -26,7 +26,13 @@ function h($s): string { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'
 function copy_text(array $v): string {
     $title = trim((string)($v['title'] ?? ''));
     $url = video_url($v);
-    return $title !== '' ? $title . "\n\n" . $url : $url;
+    $lines = array('Kurageプロジェクト AI Radio Scripted-MV');
+    if ($title !== '') {
+        $lines[] = $title;
+    }
+    $lines[] = $url;
+    $lines[] = 'Powered by 株式会社エクスブリッジ';
+    return implode("\n", $lines);
 }
 
 function load_videos(string $path): array {
@@ -168,7 +174,7 @@ if ($detail) {
     <div class="actions">
       <a class="btn primary" href="<?= h($THIS_FILE) ?>">一覧</a>
       <button class="btn copy-btn" type="button" data-copy-text="<?= h(copy_text($detail)) ?>">📋 コピー</button>
-      <a class="btn x" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=<?= rawurlencode(($detail['title'] ?? 'AIRadio Scripted-MV') . "\n\n" . video_url($detail)) ?>">𝕏 投稿</a>
+      <a class="btn x" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=<?= rawurlencode(copy_text($detail)) ?>">𝕏 投稿</a>
       <?php if ($is_admin): ?>
       <form method="post" style="display:inline" onsubmit="return confirm('削除しますか？')">
         <input type="hidden" name="delete_job" value="<?= h($detail_id) ?>">
@@ -209,7 +215,7 @@ if ($detail) {
         <div class="actions">
           <a class="btn primary" href="<?= h($THIS_FILE . '?id=' . urlencode($v['job_id'] ?? '')) ?>">📄 詳細</a>
           <button class="btn copy-btn" type="button" data-copy-text="<?= h(copy_text($v)) ?>">📋 コピー</button>
-          <a class="btn x" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=<?= rawurlencode(($v['title'] ?? 'AIRadio Scripted-MV') . "\n\n" . video_url($v)) ?>">𝕏 投稿</a>
+          <a class="btn x" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=<?= rawurlencode(copy_text($v)) ?>">𝕏 投稿</a>
           <button class="btn reel-open-btn" type="button" data-idx="<?= $ri ?>">🎬 リール</button>
           <?php if ($is_admin): ?>
           <form method="post" style="display:inline" onsubmit="return confirm('削除しますか？')">
@@ -239,7 +245,7 @@ if ($detail) {
       <div class="reel-side">
         <button class="reel-side-btn reel-mute-btn" type="button" onclick="reelMuteToggle()">🔇<span>音声</span></button>
         <button class="reel-side-btn reel-copy-btn" type="button" data-copy-text="<?= h(copy_text($v)) ?>">📋<span>コピー</span></button>
-        <a class="reel-side-btn" href="https://twitter.com/intent/tweet?text=<?= rawurlencode(($v['title'] ?? '') . "\n\n" . video_url($v)) ?>" target="_blank" rel="noopener">𝕏<span>投稿</span></a>
+        <a class="reel-side-btn" href="https://twitter.com/intent/tweet?text=<?= rawurlencode(copy_text($v)) ?>" target="_blank" rel="noopener">𝕏<span>投稿</span></a>
         <a class="reel-side-btn" href="<?= h($THIS_FILE . '?id=' . urlencode($v['job_id'] ?? '')) ?>">📄<span>詳細</span></a>
       </div>
     </div>
