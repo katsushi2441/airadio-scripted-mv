@@ -14,6 +14,16 @@ from googleapiclient.http import MediaFileUpload
 ROOT = Path(__file__).resolve().parents[2]
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 DEFAULT_TOKEN = ROOT / "storage" / "youtube" / "token.json"
+TITLE_SUFFIX = " - Ernie Kurage Wan Hyperframes Ollama Claude"
+MAX_YOUTUBE_TITLE = 100
+
+
+def normalize_title(title: str) -> str:
+    title = (title or "").strip()
+    if TITLE_SUFFIX not in title:
+        base_limit = MAX_YOUTUBE_TITLE - len(TITLE_SUFFIX)
+        title = title[:base_limit].rstrip() + TITLE_SUFFIX
+    return title[:MAX_YOUTUBE_TITLE].rstrip()
 
 
 def load_credentials(token_path: Path) -> Credentials:
@@ -37,7 +47,7 @@ def upload_video(args: argparse.Namespace) -> dict:
     youtube = build("youtube", "v3", credentials=creds)
     body = {
         "snippet": {
-            "title": args.title,
+            "title": normalize_title(args.title),
             "description": args.description,
             "categoryId": args.category_id,
             "tags": [tag.strip() for tag in args.tags.split(",") if tag.strip()],

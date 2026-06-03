@@ -109,6 +109,14 @@ python3 tools/youtube/upload_youtube.py /path/to/video.mp4 \
 
 テスト投稿は `unlisted` 推奨。本番告知する動画は `public`。
 
+`upload_youtube.py` は、投稿タイトルへ自動で以下のsuffixを付与する。
+
+```text
+ - Ernie Kurage Wan Hyperframes Ollama Claude
+```
+
+手動で `--title` を指定するときは、ベースタイトルだけ入れればよい。YouTubeのタイトル上限100文字に収まるよう、suffix込みで自動調整される。
+
 ## Horizon/Kurage動画の投稿例
 
 対象ページ:
