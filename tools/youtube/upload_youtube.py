@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import tempfile
 from pathlib import Path
 
 from google.auth.transport.requests import Request
@@ -38,10 +40,84 @@ def load_credentials(token_path: Path) -> Credentials:
     return creds
 
 
+def _probe_video_size(video_path: Path) -> tuple[int, int]:
+    cmd = [
+        "ffprobe", "-v", "error",
+        "-select_streams", "v:0",
+        "-show_entries", "stream=width,height",
+        "-of", "csv=s=x:p=0",
+        str(video_path),
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr[-500:] or "ffprobe failed")
+    width, height = result.stdout.strip().split("x", 1)
+    return int(width), int(height)
+
+
+def make_thumbnail_intro_video(video_path: Path, thumbnail_path: Path, seconds: float = 1.2) -> Path:
+    """Create an upload-only MP4 with thumbnail image inserted as the first frame segment.
+
+    This helps YouTube Shorts pick the intended thumbnail, because Shorts often ignore
+    external custom thumbnails set via API.
+    """
+    if not thumbnail_path.is_file():
+        return video_path
+    width, height = _probe_video_size(video_path)
+    tmpdir = Path(tempfile.mkdtemp(prefix="youtube-thumb-intro-"))
+    intro = tmpdir / "intro.mp4"
+    concat = tmpdir / "concat.txt"
+    output = tmpdir / "upload_with_thumbnail_intro.mp4"
+    vf = (
+        f"scale={width}:{height}:force_original_aspect_ratio=increase,"
+        f"crop={width}:{height},setsar=1"
+    )
+    intro_cmd = [
+        "ffmpeg", "-y",
+        "-loop", "1", "-t", f"{seconds:.2f}",
+        "-i", str(thumbnail_path),
+        "-f", "lavfi", "-t", f"{seconds:.2f}", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
+        "-vf", vf,
+        "-r", "30",
+        "-c:v", "libx264", "-pix_fmt", "yuv420p",
+        "-c:a", "aac", "-shortest",
+        str(intro),
+    ]
+    result = subprocess.run(intro_cmd, capture_output=True, text=True, timeout=120)
+    if result.returncode != 0:
+        raise RuntimeError("thumbnail intro failed: " + result.stderr[-1000:])
+    concat.write_text(f"file '{intro}'\nfile '{video_path}'\n", encoding="utf-8")
+    concat_cmd = [
+        "ffmpeg", "-y",
+        "-f", "concat", "-safe", "0",
+        "-i", str(concat),
+        "-c", "copy",
+        str(output),
+    ]
+    result = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=180)
+    if result.returncode != 0:
+        # Fallback to re-encode if stream metadata differs.
+        concat_cmd = [
+            "ffmpeg", "-y",
+            "-f", "concat", "-safe", "0",
+            "-i", str(concat),
+            "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-c:a", "aac",
+            str(output),
+        ]
+        result = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=300)
+    if result.returncode != 0 or not output.exists():
+        raise RuntimeError("thumbnail intro concat failed: " + result.stderr[-1000:])
+    print(f"thumbnail intro video: {output}", flush=True)
+    return output
+
+
 def upload_video(args: argparse.Namespace) -> dict:
     video_path = Path(args.video)
     if not video_path.is_file():
         raise SystemExit(f"video not found: {video_path}")
+    if args.thumbnail_intro:
+        video_path = make_thumbnail_intro_video(video_path, Path(args.thumbnail_intro), args.thumbnail_intro_seconds)
 
     creds = load_credentials(Path(args.token))
     youtube = build("youtube", "v3", credentials=creds)
@@ -81,6 +157,8 @@ def main() -> None:
     parser.add_argument("--privacy", choices=("private", "unlisted", "public"), default="unlisted")
     parser.add_argument("--token", default=str(DEFAULT_TOKEN))
     parser.add_argument("--json-out", default="")
+    parser.add_argument("--thumbnail-intro", default="", help="prepend this image as a short intro frame for Shorts thumbnails")
+    parser.add_argument("--thumbnail-intro-seconds", type=float, default=1.2)
     args = parser.parse_args()
 
     response = upload_video(args)
