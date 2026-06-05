@@ -66,7 +66,6 @@ def make_thumbnail_intro_video(video_path: Path, thumbnail_path: Path, seconds: 
     width, height = _probe_video_size(video_path)
     tmpdir = Path(tempfile.mkdtemp(prefix="youtube-thumb-intro-"))
     intro = tmpdir / "intro.mp4"
-    concat = tmpdir / "concat.txt"
     output = tmpdir / "upload_with_thumbnail_intro.mp4"
     vf = (
         f"scale={width}:{height}:force_original_aspect_ratio=increase,"
@@ -86,26 +85,21 @@ def make_thumbnail_intro_video(video_path: Path, thumbnail_path: Path, seconds: 
     result = subprocess.run(intro_cmd, capture_output=True, text=True, timeout=120)
     if result.returncode != 0:
         raise RuntimeError("thumbnail intro failed: " + result.stderr[-1000:])
-    concat.write_text(f"file '{intro}'\nfile '{video_path}'\n", encoding="utf-8")
+    # Use filter concat, not concat demuxer. Some generated MP4s have timestamp
+    # metadata that makes demuxer concat produce a much longer upload duration.
     concat_cmd = [
         "ffmpeg", "-y",
-        "-f", "concat", "-safe", "0",
-        "-i", str(concat),
-        "-c", "copy",
+        "-i", str(intro),
+        "-i", str(video_path),
+        "-filter_complex", "[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2:v=1:a=1[v][a]",
+        "-map", "[v]",
+        "-map", "[a]",
+        "-c:v", "libx264", "-pix_fmt", "yuv420p",
+        "-c:a", "aac",
+        "-movflags", "+faststart",
         str(output),
     ]
-    result = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=180)
-    if result.returncode != 0:
-        # Fallback to re-encode if stream metadata differs.
-        concat_cmd = [
-            "ffmpeg", "-y",
-            "-f", "concat", "-safe", "0",
-            "-i", str(concat),
-            "-c:v", "libx264", "-pix_fmt", "yuv420p",
-            "-c:a", "aac",
-            str(output),
-        ]
-        result = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=300)
+    result = subprocess.run(concat_cmd, capture_output=True, text=True, timeout=300)
     if result.returncode != 0 or not output.exists():
         raise RuntimeError("thumbnail intro concat failed: " + result.stderr[-1000:])
     print(f"thumbnail intro video: {output}", flush=True)
