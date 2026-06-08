@@ -55,7 +55,7 @@ def _probe_video_size(video_path: Path) -> tuple[int, int]:
     return int(width), int(height)
 
 
-def make_thumbnail_intro_video(video_path: Path, thumbnail_path: Path, seconds: float = 1.2) -> Path:
+def make_thumbnail_intro_video(video_path: Path, thumbnail_path: Path, seconds: float = 3.0) -> Path:
     """Create an upload-only MP4 with thumbnail image inserted as the first frame segment.
 
     This helps YouTube Shorts pick the intended thumbnail, because Shorts often ignore
@@ -152,7 +152,7 @@ def main() -> None:
     parser.add_argument("--token", default=str(DEFAULT_TOKEN))
     parser.add_argument("--json-out", default="")
     parser.add_argument("--thumbnail-intro", default="", help="prepend this image as a short intro frame for Shorts thumbnails")
-    parser.add_argument("--thumbnail-intro-seconds", type=float, default=1.2)
+    parser.add_argument("--thumbnail-intro-seconds", type=float, default=3.0)
     args = parser.parse_args()
 
     response = upload_video(args)

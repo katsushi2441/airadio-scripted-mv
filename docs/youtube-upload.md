@@ -338,9 +338,25 @@ python3 tools/youtube/upload_youtube.py \
 https://youtu.be/o1hrS5r6DqI
 ```
 
-## サムネイル画像を設定する
+## Shortsサムネイル用の先頭イントロ
 
-YouTubeのサムネイルは、投稿後に `tools/youtube/set_thumbnail.py` で設定できる。
+YouTube Shortsは、投稿後に外部サムネイルを設定しても反映されないことがある。
+
+Kurage/Horizonの縦動画をShortsとして投稿する場合は、サムネイル画像を動画の先頭に3秒入れてからアップロードする。公式には「何秒必要」という基準は公開されていないが、自動運用では1.2秒では短く外れることがあったため、次回以降は3.0秒を標準にする。
+
+```bash
+python3 tools/youtube/upload_youtube.py /path/to/output.mp4 \
+  --title "動画タイトル" \
+  --description "説明文" \
+  --tags "AI,Kurage,Horizon,VWork" \
+  --privacy public \
+  --thumbnail-intro /path/to/thumbnail.jpg \
+  --thumbnail-intro-seconds 3.0
+```
+
+## 通常動画のサムネイル画像を設定する
+
+YouTubeの通常動画サムネイルは、投稿後に `tools/youtube/set_thumbnail.py` で設定できる。Shortsでは上の先頭イントロ方式を優先する。
 
 画像は1280x720のJPG/PNGを推奨する。生成画像が大きい場合はPillowで変換する。
 
