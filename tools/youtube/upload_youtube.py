@@ -91,7 +91,7 @@ def make_thumbnail_intro_video(video_path: Path, thumbnail_path: Path, seconds: 
         "ffmpeg", "-y",
         "-i", str(intro),
         "-i", str(video_path),
-        "-filter_complex", "[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2:v=1:a=1[v][a]",
+        "-filter_complex", "[0:v:0]setsar=1[v0];[1:v:0]setsar=1[v1];[v0][0:a:0][v1][1:a:0]concat=n=2:v=1:a=1[v][a]",
         "-map", "[v]",
         "-map", "[a]",
         "-c:v", "libx264", "-pix_fmt", "yuv420p",
