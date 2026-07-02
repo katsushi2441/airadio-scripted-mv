@@ -33,6 +33,8 @@ def main() -> None:
         "assets/scripted-mv-icon.png",
         "assets/scripted-mv-icon-512.png",
         "assets/scripted-mv-icon-256.png",
+        "assets/scripted_mv_app_screenshot.png",
+        "assets/scripted_mvv_app_screenshot.png",
     ]
     with ftplib.FTP(host, timeout=60) as ftp:
         ftp.login(user, password)
