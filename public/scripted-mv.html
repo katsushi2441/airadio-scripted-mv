@@ -1,24 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kurage Project AIRadio Scripted-MV</title>
-  <meta name="description" content="AIRadio Scripted-MV, a Kurage Project spin-off: upload an MP3 and get lyric extraction, AI scripting, image generation, a subtitled music video, lyric/title editing, and reel playback.">
-  <link rel="canonical" href="https://airadio-scripted-mv.exbridge.jp/">
+  <title>Kurageプロジェクト AIRadio Scripted-MV</title>
+  <meta name="description" content="Kurageプロジェクトから派生した、MP3から歌詞抽出、AI脚本、画像生成、歌詞字幕付きMV生成、歌詞とタイトル修正、リール表示まで行うAIRadio Scripted-MV。">
+  <link rel="canonical" href="https://airadio-scripted-mv.exbridge.jp/scripted-mv.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Kurage Project AIRadio Scripted-MV">
-  <meta property="og:description" content="A Kurage Project spin-off that turns an MP3 into a lyric-subtitled music video: lyric extraction, AI scripting, image generation, and MV rendering.">
-  <meta property="og:url" content="https://airadio-scripted-mv.exbridge.jp/">
+  <meta property="og:title" content="Kurageプロジェクト AIRadio Scripted-MV">
+  <meta property="og:description" content="Kurageプロジェクトから派生した、MP3から歌詞抽出、AI脚本、画像生成、歌詞字幕付きMV生成まで行うAIRadio Scripted-MV。">
+  <meta property="og:url" content="https://airadio-scripted-mv.exbridge.jp/scripted-mv.html">
   <meta property="og:image" content="https://airadio-scripted-mv.exbridge.jp/assets/scripted-mv-ogp.png">
   <meta property="og:image:width" content="1536">
   <meta property="og:image:height" content="1024">
-  <meta property="og:image:alt" content="Kurage Project AIRadio Scripted-MV">
+  <meta property="og:image:alt" content="Kurageプロジェクト AIRadio Scripted-MV">
   <meta property="og:site_name" content="AIRadio Scripted-MV">
-  <meta property="og:locale" content="en_US">
+  <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Kurage Project AIRadio Scripted-MV">
-  <meta name="twitter:description" content="Turn an MP3 into a lyric-subtitled music video. A Kurage Project spin-off.">
+  <meta name="twitter:title" content="Kurageプロジェクト AIRadio Scripted-MV">
+  <meta name="twitter:description" content="MP3から歌詞字幕付きMVを生成するKurage派生プロジェクト。">
   <meta name="twitter:image" content="https://airadio-scripted-mv.exbridge.jp/assets/scripted-mv-ogp.png">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BP0650KDFR"></script>
@@ -79,11 +79,11 @@
         <img src="https://orynth.dev/api/badge/airadio-scripted-mv-optional-plugin?theme=light&style=default" alt="Featured on Orynth" width="260" height="80">
       </a>
       <img class="icon" src="assets/kurage-icon.png" alt="Kurage">
-      <div class="brand">Kurage Project AIRadio Scripted-MV<span>Lyric-subtitled music video generation system</span></div>
+      <div class="brand">Kurageプロジェクト AIRadio Scripted-MV<span>歌詞字幕付きミュージックビデオ生成システム</span></div>
       <div class="links">
-        <a class="link" href="scripted-mv.html">日本語</a>
-        <a class="link" href="scripted-mvv.php">MV Gallery</a>
-        <a class="link primary" href="scripted-mv.php">Open Generator</a>
+        <a class="link" href="index.html">English</a>
+        <a class="link" href="scripted-mvv.php">生成済みMV一覧</a>
+        <a class="link primary" href="scripted-mv.php">生成ツール</a>
       </div>
     </div>
   </header>
@@ -91,53 +91,53 @@
   <main>
     <section class="hero">
       <div>
-        <h1>Turn a music file into a lyric-subtitled music video.</h1>
-        <p class="lead">AIRadio Scripted-MV is a pipeline that takes an uploaded MP3 through lyric extraction, video script generation, image generation, and MV rendering with HyperFrames — all in one flow.</p>
-        <p>After generation, you can edit the lyrics and title on screen and re-render the MP4 with your changes. You can also switch the Whisper model and re-analyze the original MP3.</p>
+        <h1>音楽ファイルから、歌詞字幕付きMVを生成する。</h1>
+        <p class="lead">AIRadio Scripted-MVは、MP3をアップロードして、歌詞抽出、映像脚本生成、画像生成、HyperFramesによるMV生成までを一連の流れで実行するシステムです。</p>
+        <p>生成後は、歌詞やタイトルを画面上で修正し、その内容を反映したMP4を再生成できます。Whisperモデルを変更して、元のMP3から再解析することもできます。</p>
         <div class="cta">
-          <a class="btn" href="scripted-mv.php">Open the Generator</a>
-          <a class="btn secondary" href="scripted-mvv.php">Browse the MV Gallery</a>
+          <a class="btn" href="scripted-mv.php">生成ツールを開く</a>
+          <a class="btn secondary" href="scripted-mvv.php">MV一覧を見る</a>
         </div>
       </div>
       <div class="panel">
         <div class="steps">
-          <div class="step"><span class="num">1</span><span><strong>Upload an MP3</strong>Register a music file and start analysis as an asynchronous job.</span></div>
-          <div class="step"><span class="num">2</span><span><strong>Demucs + faster-whisper</strong>After vocal separation, lyrics are extracted to the very end without VAD.</span></div>
-          <div class="step"><span class="num">3</span><span><strong>AI script &amp; image generation</strong>Background images are generated to match the song — roughly one per 10 seconds.</span></div>
-          <div class="step"><span class="num">4</span><span><strong>Render MP4 with HyperFrames</strong>The original audio plays under a vertical MV with lyric subtitles.</span></div>
+          <div class="step"><span class="num">1</span><span><strong>MP3アップロード</strong>音楽ファイルを登録し、非同期ジョブとして解析を開始します。</span></div>
+          <div class="step"><span class="num">2</span><span><strong>Demucs + faster-whisper</strong>ボーカル分離後、VADを使わず歌詞を最後まで抽出します。</span></div>
+          <div class="step"><span class="num">3</span><span><strong>AI脚本と画像生成</strong>曲の長さに合わせ、約10秒に1枚の映像背景を生成します。</span></div>
+          <div class="step"><span class="num">4</span><span><strong>HyperFramesでMP4生成</strong>元の音楽を流し、歌詞字幕付き縦型MVとして書き出します。</span></div>
         </div>
       </div>
     </section>
 
     <section class="band">
-      <h2>A spin-off of the Kurage Project</h2>
-      <p>This system is built on the Kurage Project, which generates short videos from X posts. It reuses the job management, image generation, video generation, gallery, and reel-playback mechanisms developed in Kurage, and extends them into music-driven MV generation.</p>
-      <p>It upgrades the original AI Radio Scripted MV to handle lyric extraction, lyric editing, title editing, model re-analysis, a public gallery, and reel playback.</p>
+      <h2>Kurageから派生したAIRadio Scripted-MV</h2>
+      <p>このシステムは、X投稿からショート動画を生成するKurageプロジェクトを土台にしています。Kurageで作ってきた、ジョブ管理、画像生成、動画生成、一覧表示、リール表示の仕組みを活かし、音楽ファイルを起点にしたMV生成へ発展させました。</p>
+      <p>既存のAI Radio Scripted MVを、歌詞抽出、歌詞修正、タイトル修正、モデル再解析、公開用一覧、リール表示まで扱える形にバージョンアップしています。</p>
     </section>
 
     <section class="kurage-promo">
       <a href="https://github.com/katsushi2441/kurage" target="_blank" rel="noopener">
-        <img src="assets/kurage.png" alt="Kurage Project">
+        <img src="assets/kurage.png" alt="Kurageプロジェクト">
       </a>
       <div>
-        <h2>The original Kurage Project</h2>
-        <p>Kurage is a separate repository that generates AI short videos from X posts. AIRadio Scripted-MV is a spin-off that applies the video generation pipeline developed there to music video generation.</p>
+        <h2>元になったKurageプロジェクト</h2>
+        <p>Kurageは、X投稿をもとにAIショート動画を生成する別リポジトリのプロジェクトです。AIRadio Scripted-MVは、その開発で得た動画生成パイプラインを音楽MV生成に応用した派生プロジェクトです。</p>
         <div class="cta">
-          <a class="btn" href="https://github.com/katsushi2441/kurage" target="_blank" rel="noopener">Kurage on GitHub</a>
-          <a class="btn secondary" href="https://aiknowledgecms.exbridge.jp/kuragev.php" target="_blank" rel="noopener">Watch Kurage Videos</a>
+          <a class="btn" href="https://github.com/katsushi2441/kurage" target="_blank" rel="noopener">KurageのGitHubを見る</a>
+          <a class="btn secondary" href="https://aiknowledgecms.exbridge.jp/kuragev.php" target="_blank" rel="noopener">Kurage動画を見る</a>
         </div>
       </div>
     </section>
 
     <section>
-      <h2>Key Features</h2>
+      <h2>主な機能</h2>
       <div class="grid">
-        <div class="card"><h3>Lyric Extraction</h3><p>Demucs separates the vocals, then faster-whisper produces SRT, LRC, and TXT. Choose from tiny, base, small, medium, and large-v3 models.</p></div>
-        <div class="card"><h3>Re-analysis with Another Model</h3><p>Even for completed jobs, you can re-analyze the original MP3 with a different model. Lyrics, images, and the MP4 are updated under the same job ID.</p></div>
-        <div class="card"><h3>Lyric &amp; Title Editing</h3><p>Edit the LRC lyrics and title after generation, then re-render the MP4 with your corrections applied.</p></div>
-        <div class="card"><h3>Script &amp; Image Generation</h3><p>A video script and image prompts are created from the mood of the lyrics, generating background images for a vertical MV.</p></div>
-        <div class="card"><h3>Video Rendering</h3><p>HyperFrames renders a vertical MP4 with lyric subtitles, using the original audio as-is.</p></div>
-        <div class="card"><h3>Gallery &amp; Reel Playback</h3><p>Browse published MVs in a gallery, play details, or watch continuously in reel format. Gallery thumbnails show the 1-second mark.</p></div>
+        <div class="card"><h3>歌詞抽出</h3><p>Demucsでボーカルを分離し、faster-whisperでSRT、LRC、TXTを生成します。tiny、base、small、medium、large-v3を選択できます。</p></div>
+        <div class="card"><h3>モデル変更再解析</h3><p>生成済みジョブでも、元MP3からモデルを変えて再解析できます。歌詞、画像、MP4は同じジョブIDで更新されます。</p></div>
+        <div class="card"><h3>歌詞とタイトル修正</h3><p>生成後にLRC歌詞とタイトルを編集し、修正内容を反映したMP4を再生成できます。</p></div>
+        <div class="card"><h3>脚本・画像生成</h3><p>歌詞の雰囲気から映像脚本と画像プロンプトを作り、縦型MV用の背景画像を生成します。</p></div>
+        <div class="card"><h3>動画生成</h3><p>HyperFramesで元音源をそのまま使い、歌詞字幕付きの縦型MP4を生成します。</p></div>
+        <div class="card"><h3>一覧・リール表示</h3><p>公開済みMVを一覧表示し、詳細再生やリール形式で連続視聴できます。一覧サムネイルは1秒地点を表示します。</p></div>
       </div>
     </section>
   </main>

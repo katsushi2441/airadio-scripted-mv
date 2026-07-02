@@ -22,6 +22,7 @@ def main() -> None:
     files = [
         ".htaccess",
         "index.html",
+        "scripted-mv.html",
         "scripted-mv.php",
         "scripted-mvv.php",
         "auth_common.php",
