@@ -1,4 +1,5 @@
 AIRADIO_LYRICS_API: http://exbridge.ddns.net:18201
-AIGM_BASE_URL: https://aiknowledgecms.exbridge.jp
+AIGM_BASE_URL: https://airadio-scripted-mv.exbridge.jp
+AIGM_AUTH_BASE_URL: https://aiknowledgecms.exbridge.jp
 AIGM_COOKIE_DOMAIN: .exbridge.jp
 AIGM_ADMIN: xb_bittensor

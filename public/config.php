@@ -14,7 +14,7 @@ function airadio_load_config($yaml_path) {
 $airadio_config = airadio_load_config(__DIR__ . '/config.yaml');
 
 define('AIRADIO_LYRICS_API', $airadio_config['AIRADIO_LYRICS_API'] ?? getenv('AIRADIO_LYRICS_API') ?: 'http://exbridge.ddns.net:18201');
-define('AIGM_BASE_URL', $airadio_config['AIGM_BASE_URL'] ?? 'https://aiknowledgecms.exbridge.jp');
+define('AIGM_BASE_URL', $airadio_config['AIGM_BASE_URL'] ?? 'https://airadio-scripted-mv.exbridge.jp');
+define('AIGM_AUTH_BASE_URL', $airadio_config['AIGM_AUTH_BASE_URL'] ?? 'https://aiknowledgecms.exbridge.jp');
 define('AIGM_COOKIE_DOMAIN', $airadio_config['AIGM_COOKIE_DOMAIN'] ?? '.exbridge.jp');
 define('AIGM_ADMIN', $airadio_config['AIGM_ADMIN'] ?? 'xb_bittensor');
-
