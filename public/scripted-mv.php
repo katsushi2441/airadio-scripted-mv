@@ -11,12 +11,114 @@ $logged_in = $auth['logged_in'];
 $session_user = $auth['session_user'];
 $is_admin = $auth['is_admin'];
 
+
+$lang = strtolower(trim((string)($_GET['lang'] ?? 'ja')));
+$lang = in_array($lang, array('ja', 'en'), true) ? $lang : 'ja';
+$lang_query = $lang === 'en' ? '?lang=en' : '?lang=ja';
+$other_lang = $lang === 'en' ? 'ja' : 'en';
+$other_lang_label = $lang === 'en' ? '日本語' : 'English';
+$self_url = 'https://airadio-scripted-mv.exbridge.jp/' . $THIS_FILE . $lang_query;
+$login_url = 'https://airadio-scripted-mv.exbridge.jp/' . $THIS_FILE . $lang_query;
+$ui = array(
+    'ja' => array(
+        'html_lang' => 'ja',
+        'title' => 'Kurageプロジェクト AIRadio Scripted-MV',
+        'meta_description' => 'MP3から歌詞を抽出し、AI脚本、画像生成、HyperFramesで歌詞字幕付きMVを生成するKurage派生プロジェクト。',
+        'og_description' => 'MP3から歌詞字幕付きミュージックビデオを生成するAIシステム。',
+        'og_alt' => 'AIRadio Scripted-MV 歌詞字幕付きMV生成AIシステム',
+        'brand_prefix' => 'Kurageプロジェクト',
+        'brand_sub' => 'Demucs + Whisper + HyperFrames',
+        'list' => '一覧',
+        'logout' => 'logout',
+        'login_x' => 'Xでログイン',
+        'login_needed' => '管理者ログイン後、MP3をアップロードして生成できます。',
+        'admin_needed' => '管理者アカウント <strong>xb_bittensor</strong> でログインしてください。',
+        'hero_text' => 'MP3をアップロードすると、歌詞抽出、脚本生成、曲の長さに応じた画像生成、HyperFrames動画生成まで非同期で実行します。',
+        'upload' => 'Upload',
+        'audio_file' => '音声ファイル',
+        'model' => 'モデル',
+        'language' => '言語',
+        'start' => '解析開始',
+        'outputs_hint' => '生成物: lyrics_mv.mp4 / vocals.wav / lyrics.srt / lyrics.lrc / lyrics.txt',
+        'status' => 'Status',
+        'waiting' => '待機中...',
+        'title_label' => 'タイトル',
+        'reextract_model' => '再解析モデル',
+        'reextract' => 'モデル変更して再解析',
+        'lyrics_edit' => '歌詞修正（LRC）',
+        'rerender' => 'タイトル・歌詞を修正してMP4再生成',
+        'recent_jobs' => 'Recent Jobs',
+        'refresh' => '更新',
+        'refresh_hint' => '必要なときに更新してください。',
+        'no_jobs' => 'まだジョブはありません。',
+        'jobs_failed' => 'Recent Jobsを取得できませんでした。',
+        'delete' => '削除',
+        'delete_confirm' => 'このジョブを削除しますか？',
+        'delete_failed' => '削除失敗: ',
+        'select_job' => 'ジョブを選択してください',
+        'reextract_confirm' => '元のMP3からモデルを変えて再解析します。歌詞・画像・MP4は上書きされます。',
+        'register_failed' => '登録失敗: ',
+        'rerender_failed' => '再生成失敗: ',
+        'reextract_failed' => '再解析失敗: ',
+        'admin_required_error' => 'admin login required',
+        'audio_required_error' => 'audio upload required',
+        'seconds_label' => '秒',
+        'images_label' => '画像',
+    ),
+    'en' => array(
+        'html_lang' => 'en',
+        'title' => 'Kurage Project AIRadio Scripted-MV',
+        'meta_description' => 'A Kurage-derived AI system that extracts lyrics from MP3 files, generates visual scripts and images, and renders lyric music videos with HyperFrames.',
+        'og_description' => 'Generate AI lyric music videos from MP3 files with lyrics extraction, visual scripting, image generation, and HyperFrames rendering.',
+        'og_alt' => 'AIRadio Scripted-MV AI lyric music video generation system',
+        'brand_prefix' => 'Kurage Project',
+        'brand_sub' => 'Demucs + Whisper + HyperFrames',
+        'list' => 'Gallery',
+        'logout' => 'logout',
+        'login_x' => 'Login with X',
+        'login_needed' => 'After admin login, you can upload an MP3 and generate a lyric MV.',
+        'admin_needed' => 'Please log in with the admin account <strong>xb_bittensor</strong>.',
+        'hero_text' => 'Upload an MP3 and the system asynchronously extracts lyrics, generates a visual script, creates images matched to the song length, and renders a HyperFrames lyric MV.',
+        'upload' => 'Upload',
+        'audio_file' => 'Audio file',
+        'model' => 'Model',
+        'language' => 'Language',
+        'start' => 'Start analysis',
+        'outputs_hint' => 'Outputs: lyrics_mv.mp4 / vocals.wav / lyrics.srt / lyrics.lrc / lyrics.txt',
+        'status' => 'Status',
+        'waiting' => 'Waiting...',
+        'title_label' => 'Title',
+        'reextract_model' => 'Re-extraction model',
+        'reextract' => 'Re-extract with selected model',
+        'lyrics_edit' => 'Edit lyrics (LRC)',
+        'rerender' => 'Update title/lyrics and regenerate MP4',
+        'recent_jobs' => 'Recent Jobs',
+        'refresh' => 'Refresh',
+        'refresh_hint' => 'Refresh when you need the latest status.',
+        'no_jobs' => 'No jobs yet.',
+        'jobs_failed' => 'Could not load Recent Jobs.',
+        'delete' => 'Delete',
+        'delete_confirm' => 'Delete this job?',
+        'delete_failed' => 'Delete failed: ',
+        'select_job' => 'Please select a job.',
+        'reextract_confirm' => 'Re-extract from the original MP3 with the selected model. Lyrics, images, and MP4 will be overwritten.',
+        'register_failed' => 'Registration failed: ',
+        'rerender_failed' => 'Rerender failed: ',
+        'reextract_failed' => 'Re-extraction failed: ',
+        'admin_required_error' => 'admin login required',
+        'audio_required_error' => 'audio upload required',
+        'seconds_label' => ' sec',
+        'images_label' => 'images',
+    ),
+);
+$t = $ui[$lang];
+
 if (isset($_GET['login'])) {
-    header('Location: ' . url2ai_auth_login_url('https://airadio-scripted-mv.exbridge.jp/' . $THIS_FILE));
+    header('Location: ' . url2ai_auth_login_url($login_url));
     exit;
 }
 if (isset($_GET['logout'])) {
-    header('Location: ' . url2ai_auth_logout_url('https://airadio-scripted-mv.exbridge.jp/' . $THIS_FILE));
+    header('Location: ' . url2ai_auth_logout_url($login_url));
     exit;
 }
 if (session_status() === PHP_SESSION_ACTIVE) {
@@ -76,12 +178,12 @@ if ($proxy !== '') {
     header('Content-Type: application/json; charset=utf-8');
     if (!$is_admin) {
         http_response_code(403);
-        echo json_encode(array('ok'=>false, 'error'=>'admin login required'), JSON_UNESCAPED_UNICODE);
+        echo json_encode(array('ok'=>false, 'error'=>$t['admin_required_error']), JSON_UNESCAPED_UNICODE);
         exit;
     }
     if ($proxy === 'extract' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($_FILES['audio']) || $_FILES['audio']['error'] !== UPLOAD_ERR_OK) {
-            echo json_encode(array('ok'=>false, 'error'=>'audio upload required'), JSON_UNESCAPED_UNICODE);
+            echo json_encode(array('ok'=>false, 'error'=>$t['audio_required_error']), JSON_UNESCAPED_UNICODE);
             exit;
         }
         $model = $_POST['model'] ?? 'small';
@@ -187,24 +289,26 @@ if (isset($_GET['file'], $_GET['job_id'])) {
 
 $api_ok = null;
 ?><!doctype html>
-<html lang="ja">
+<html lang="<?= h($t['html_lang']) ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kurageプロジェクト AIRadio Scripted-MV</title>
-<meta name="description" content="MP3から歌詞を抽出し、AI脚本、画像生成、HyperFramesで歌詞字幕付きMVを生成するKurage派生プロジェクト。">
-<link rel="canonical" href="https://airadio-scripted-mv.exbridge.jp/scripted-mv.php">
+<title><?= h($t['title']) ?></title>
+<meta name="description" content="<?= h($t['meta_description']) ?>">
+<link rel="canonical" href="<?= h($self_url) ?>">
+<link rel="alternate" hreflang="ja" href="https://airadio-scripted-mv.exbridge.jp/scripted-mv.php?lang=ja">
+<link rel="alternate" hreflang="en" href="https://airadio-scripted-mv.exbridge.jp/scripted-mv.php?lang=en">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Kurageプロジェクト AIRadio Scripted-MV">
-<meta property="og:description" content="MP3から歌詞字幕付きミュージックビデオを生成するAIシステム。">
-<meta property="og:url" content="https://airadio-scripted-mv.exbridge.jp/scripted-mv.php">
+<meta property="og:title" content="<?= h($t['title']) ?>">
+<meta property="og:description" content="<?= h($t['og_description']) ?>">
+<meta property="og:url" content="<?= h($self_url) ?>">
 <meta property="og:image" content="https://airadio-scripted-mv.exbridge.jp/assets/scripted-mv-ogp.png">
 <meta property="og:image:width" content="1536">
 <meta property="og:image:height" content="1024">
-<meta property="og:image:alt" content="AIRadio Scripted-MV 歌詞字幕付きMV生成AIシステム">
+<meta property="og:image:alt" content="<?= h($t['og_alt']) ?>">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kurageプロジェクト AIRadio Scripted-MV">
-<meta name="twitter:description" content="MP3から歌詞字幕付きMVを生成するKurage派生プロジェクト。">
+<meta name="twitter:title" content="<?= h($t['title']) ?>">
+<meta name="twitter:description" content="<?= h($t['og_description']) ?>">
 <meta name="twitter:image" content="https://airadio-scripted-mv.exbridge.jp/assets/scripted-mv-ogp.png">
 <style>
 :root{--bg:#f4f7f7;--surface:#fff;--border:#dbe5e8;--border2:#c4d4d8;--accent:#007f96;--accent2:#35b99b;--text:#132329;--muted:#5a6a72;--red:#b2473f;--green:#2f8f46}
@@ -238,58 +342,59 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
   <div class="brand">
     <img class="brand-icon" src="assets/kurage-icon.png" alt="Kurage">
     <div>
-      <a class="logo" href="<?= h($THIS_FILE) ?>"><span>Kurageプロジェクト</span><br>AIRadio Scripted-MV</a>
-      <span class="sub">Demucs + Whisper + HyperFrames</span>
+      <a class="logo" href="<?= h($THIS_FILE . $lang_query) ?>"><span><?= h($t['brand_prefix']) ?></span><br>AIRadio Scripted-MV</a>
+      <span class="sub"><?= h($t['brand_sub']) ?></span>
     </div>
   </div>
   <div class="userbar">
-    <a class="btn-sm" href="scripted-mvv.php">一覧</a>
-    <?php if ($logged_in): ?><span>@<strong><?= h($session_user) ?></strong></span><a class="btn-sm" href="?logout=1">logout</a><?php else: ?><a class="btn-sm" href="?login=1">Xでログイン</a><?php endif; ?>
+    <a class="btn-sm" href="scripted-mvv.php"><?= h($t['list']) ?></a>
+    <a class="btn-sm" href="<?= h($THIS_FILE . '?lang=' . $other_lang) ?>"><?= h($other_lang_label) ?></a>
+    <?php if ($logged_in): ?><span>@<strong><?= h($session_user) ?></strong></span><a class="btn-sm" href="?logout=1&amp;lang=<?= h($lang) ?>"><?= h($t['logout']) ?></a><?php else: ?><a class="btn-sm" href="?login=1&amp;lang=<?= h($lang) ?>"><?= h($t['login_x']) ?></a><?php endif; ?>
   </div>
 </header>
 <main class="container">
 <?php if (!$logged_in): ?>
-  <section class="hero"><h1>Kurageプロジェクト AIRadio Scripted-MV</h1><p>管理者ログイン後、MP3をアップロードして生成できます。</p></section>
-  <section class="card"><div class="card-body" style="text-align:center"><a class="btn" href="?login=1">Xでログイン</a></div></section>
+  <section class="hero"><h1><?= h($t['title']) ?></h1><p><?= h($t['login_needed']) ?></p></section>
+  <section class="card"><div class="card-body" style="text-align:center"><a class="btn" href="?login=1&amp;lang=<?= h($lang) ?>"><?= h($t['login_x']) ?></a></div></section>
 <?php elseif (!$is_admin): ?>
-  <section class="card"><div class="card-body">管理者アカウント <strong>xb_bittensor</strong> でログインしてください。</div></section>
+  <section class="card"><div class="card-body"><?= $t['admin_needed'] ?></div></section>
 <?php else: ?>
-  <section class="hero"><h1>Kurageプロジェクト AIRadio Scripted-MV</h1><p>MP3をアップロードすると、歌詞抽出、脚本生成、曲の長さに応じた画像生成、HyperFrames動画生成まで非同期で実行します。</p></section>
+  <section class="hero"><h1><?= h($t['title']) ?></h1><p><?= h($t['hero_text']) ?></p></section>
   <section class="card">
-    <div class="card-head"><span class="dot"></span> Upload</div>
+    <div class="card-head"><span class="dot"></span> <?= h($t['upload']) ?></div>
     <div class="card-body">
       <form id="upload-form">
         <div class="grid">
-          <div><label>音声ファイル</label><input type="file" name="audio" accept=".mp3,.wav,.m4a,.flac,.ogg,audio/*" required></div>
-          <div><label>モデル</label><select name="model"><option value="small">small</option><option value="base">base</option><option value="medium">medium</option><option value="large-v3">large-v3</option><option value="tiny">tiny</option></select></div>
-          <div><label>言語</label><input type="text" name="language" value="ja"></div>
-          <button id="btn-submit" class="btn" type="submit">解析開始</button>
+          <div><label><?= h($t['audio_file']) ?></label><input type="file" name="audio" accept=".mp3,.wav,.m4a,.flac,.ogg,audio/*" required></div>
+          <div><label><?= h($t['model']) ?></label><select name="model"><option value="small">small</option><option value="base">base</option><option value="medium">medium</option><option value="large-v3">large-v3</option><option value="tiny">tiny</option></select></div>
+          <div><label><?= h($t['language']) ?></label><input type="text" name="language" value="<?= h($lang === 'en' ? 'en' : 'ja') ?>"></div>
+          <button id="btn-submit" class="btn" type="submit"><?= h($t['start']) ?></button>
         </div>
-        <div class="hint">生成物: lyrics_mv.mp4 / vocals.wav / lyrics.srt / lyrics.lrc / lyrics.txt</div>
+        <div class="hint"><?= h($t['outputs_hint']) ?></div>
       </form>
     </div>
   </section>
 
   <section class="card" id="status-box">
-    <div class="card-head"><span class="dot"></span> Status</div>
+    <div class="card-head"><span class="dot"></span> <?= h($t['status']) ?></div>
     <div class="card-body">
       <div style="display:flex;align-items:center;gap:.6rem"><span id="badge" class="badge badge-queued">queued</span><strong id="filename"></strong></div>
       <div class="progress"><div id="fill" class="fill"></div></div>
-      <div id="message" class="hint">待機中...</div>
+      <div id="message" class="hint"><?= h($t['waiting']) ?></div>
       <div id="result-links" class="links" style="display:none"></div>
       <div id="video-wrap" class="video-wrap"><video id="video-player" controls playsinline></video></div>
       <div id="lrc-editor" class="editor">
-        <label>タイトル</label>
+        <label><?= h($t['title_label']) ?></label>
         <input type="text" id="title-text" style="margin-bottom:.8rem">
         <div class="reextract-grid">
-          <div><label>再解析モデル</label><select id="reextract-model"><option value="small">small</option><option value="base">base</option><option value="medium">medium</option><option value="large-v3">large-v3</option><option value="tiny">tiny</option></select></div>
-          <div><label>言語</label><input type="text" id="reextract-language" value="ja"></div>
-          <button id="btn-reextract" class="btn" type="button" onclick="reextractCurrent()">モデル変更して再解析</button>
+          <div><label><?= h($t['reextract_model']) ?></label><select id="reextract-model"><option value="small">small</option><option value="base">base</option><option value="medium">medium</option><option value="large-v3">large-v3</option><option value="tiny">tiny</option></select></div>
+          <div><label><?= h($t['language']) ?></label><input type="text" id="reextract-language" value="<?= h($lang === 'en' ? 'en' : 'ja') ?>"></div>
+          <button id="btn-reextract" class="btn" type="button" onclick="reextractCurrent()"><?= h($t['reextract']) ?></button>
         </div>
-        <label>歌詞修正（LRC）</label>
+        <label><?= h($t['lyrics_edit']) ?></label>
         <textarea id="lrc-text"></textarea>
         <div class="editor-actions">
-          <button id="btn-rerender" class="btn" type="button" onclick="rerenderCurrent()">タイトル・歌詞を修正してMP4再生成</button>
+          <button id="btn-rerender" class="btn" type="button" onclick="rerenderCurrent()"><?= h($t['rerender']) ?></button>
         </div>
       </div>
       <div id="error" style="display:none;color:var(--red);margin-top:.7rem"></div>
@@ -298,13 +403,14 @@ pre{white-space:pre-wrap;max-height:260px;overflow:auto;background:#0b1018;color
   </section>
 
   <section class="card">
-    <div class="card-head"><span class="dot"></span> Recent Jobs <button class="btn btn-mini" type="button" onclick="refreshJobs()">更新</button></div>
-    <div class="card-body"><div class="jobs" id="jobs-list"><div class="hint">必要なときに更新してください。</div></div></div>
+    <div class="card-head"><span class="dot"></span> <?= h($t['recent_jobs']) ?> <button class="btn btn-mini" type="button" onclick="refreshJobs()"><?= h($t['refresh']) ?></button></div>
+    <div class="card-body"><div class="jobs" id="jobs-list"><div class="hint"><?= h($t['refresh_hint']) ?></div></div></div>
   </section>
 <?php endif; ?>
 </main>
 <script>
 var PROXY = '<?= h($THIS_FILE) ?>';
+var UI = <?= json_encode($t, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 var timer = null;
 var currentJobId = null;
 function startPoll(jobId){ if(timer) clearInterval(timer); poll(jobId); timer=setInterval(function(){poll(jobId)},2500); }
@@ -319,7 +425,7 @@ if(form){
       .then(r=>r.json()).then(function(d){
         btn.disabled=false;
         if(d.ok&&d.job_id){ currentJobId=d.job_id; document.getElementById('status-box').style.display='block'; startPoll(d.job_id); }
-        else alert('登録失敗: '+(d.error||JSON.stringify(d)));
+        else alert(UI.register_failed+(d.error||JSON.stringify(d)));
       }).catch(function(err){btn.disabled=false;alert(err.message)});
   });
 }
@@ -328,7 +434,7 @@ function refreshJobs(){
   if(!list) return;
   fetch(PROXY+'?proxy=jobs').then(r=>r.json()).then(function(d){
     var jobs=d.jobs||[];
-    if(!jobs.length){list.innerHTML='<div class="hint">まだジョブはありません。</div>';return}
+    if(!jobs.length){list.innerHTML='<div class="hint">'+escapeHtml(UI.no_jobs)+'</div>';return}
     list.innerHTML=jobs.map(function(j){
       var status=j.status||'?';
       var title=escapeHtml(j.filename||j.job_id);
@@ -338,10 +444,10 @@ function refreshJobs(){
         + '<span class="badge badge-'+escapeHtml(status)+'">'+escapeHtml(status)+'</span>'
         + '<span class="job-title">'+title+'</span>'
         + '<span class="meta">'+created+'</span>'
-        + '<button class="btn btn-danger btn-mini" type="button" onclick="deleteJob(event,&quot;'+id+'&quot;)">削除</button>'
+        + '<button class="btn btn-danger btn-mini" type="button" onclick="deleteJob(event,&quot;'+id+'&quot;)">'+escapeHtml(UI.delete)+'</button>'
         + '</div>';
     }).join('');
-  }).catch(function(){list.innerHTML='<div class="hint">Recent Jobsを取得できませんでした。</div>';});
+  }).catch(function(){list.innerHTML='<div class="hint">'+escapeHtml(UI.jobs_failed)+'</div>';});
 }
 function poll(jobId){
   fetch(PROXY+'?proxy=status&job_id='+encodeURIComponent(jobId)).then(r=>r.json()).then(updateUI).catch(console.error);
@@ -355,7 +461,7 @@ function updateUI(d){
   document.getElementById('fill').style.width=(d.progress||0)+'%';
   document.getElementById('message').textContent=d.message||status;
   if(d.scene_count&&d.duration_sec){
-    document.getElementById('message').textContent=(d.message||status)+' / '+Math.round(d.duration_sec)+'秒・画像'+d.scene_count+'枚';
+    document.getElementById('message').textContent=(d.message||status)+' / '+Math.round(d.duration_sec)+UI.seconds_label+' / '+UI.images_label+' '+d.scene_count;
   }
   var log=document.getElementById('log');
   if(d.log){log.style.display='block';log.textContent=d.log}else{log.style.display='none'}
@@ -382,7 +488,7 @@ function updateUI(d){
   }
 }
 function rerenderCurrent(){
-  if(!currentJobId){alert('ジョブを選択してください');return}
+  if(!currentJobId){alert(UI.select_job);return}
   var btn=document.getElementById('btn-rerender');
   btn.disabled=true;
   var fd=new FormData();
@@ -391,12 +497,12 @@ function rerenderCurrent(){
   fetch(PROXY+'?proxy=rerender&job_id='+encodeURIComponent(currentJobId),{method:'POST',body:fd})
     .then(r=>r.json()).then(function(d){
       btn.disabled=false;
-      if(d.ok){startPoll(currentJobId)}else{alert('再生成失敗: '+(d.error||JSON.stringify(d)))}
+      if(d.ok){startPoll(currentJobId)}else{alert(UI.rerender_failed+(d.error||JSON.stringify(d)))}
     }).catch(function(e){btn.disabled=false;alert(e.message)});
 }
 function reextractCurrent(){
-  if(!currentJobId){alert('ジョブを選択してください');return}
-  if(!confirm('元のMP3からモデルを変えて再解析します。歌詞・画像・MP4は上書きされます。')) return;
+  if(!currentJobId){alert(UI.select_job);return}
+  if(!confirm(UI.reextract_confirm)) return;
   var btn=document.getElementById('btn-reextract');
   btn.disabled=true;
   var fd=new FormData();
@@ -405,12 +511,12 @@ function reextractCurrent(){
   fetch(PROXY+'?proxy=reextract&job_id='+encodeURIComponent(currentJobId),{method:'POST',body:fd})
     .then(r=>r.json()).then(function(d){
       btn.disabled=false;
-      if(d.ok){document.getElementById('lrc-editor').style.display='none';startPoll(currentJobId)}else{alert('再解析失敗: '+(d.error||JSON.stringify(d)))}
+      if(d.ok){document.getElementById('lrc-editor').style.display='none';startPoll(currentJobId)}else{alert(UI.reextract_failed+(d.error||JSON.stringify(d)))}
     }).catch(function(e){btn.disabled=false;alert(e.message)});
 }
 function deleteJob(ev,jobId){
   ev.stopPropagation();
-  if(!confirm('このジョブを削除しますか？')) return;
+  if(!confirm(UI.delete_confirm)) return;
   fetch(PROXY+'?proxy=delete&job_id='+encodeURIComponent(jobId),{method:'POST'})
     .then(r=>r.json()).then(function(d){
       if(d.ok){
@@ -419,7 +525,7 @@ function deleteJob(ev,jobId){
         if(currentJobId===jobId){currentJobId=null;document.getElementById('status-box').style.display='none';}
         refreshJobs();
       }else{
-        alert('削除失敗: '+(d.error||JSON.stringify(d)));
+        alert(UI.delete_failed+(d.error||JSON.stringify(d)));
       }
     }).catch(function(e){alert(e.message)});
 }
