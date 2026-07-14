@@ -10,7 +10,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+]
 DEFAULT_CLIENT = ROOT / "storage" / "youtube" / "oauth_client.json"
 DEFAULT_TOKEN = ROOT / "storage" / "youtube" / "token.json"
 
